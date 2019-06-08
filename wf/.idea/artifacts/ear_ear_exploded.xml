@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="exploded-ear" name="ear:ear exploded">
-    <output-path>$PROJECT_DIR$/ear/target/idmgmt</output-path>
+    <output-path>$PROJECT_DIR$/ear/target/vc</output-path>
     <properties id="maven-jee-properties">
       <options>
         <exploded>true</exploded>
@@ -11,7 +11,7 @@
     <root id="root">
       <element id="javaee-facet-resources" facet="ear/javaeeApplication/JavaEE" />
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/ear/target/idmgmt/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/ear/target/vc/META-INF/MANIFEST.MF" />
       </element>
       <element id="dir-copy" path="$PROJECT_DIR$/ear/src/main/application" />
       <element id="archive" name="ejb-2019-spock.jar">
@@ -25,6 +25,11 @@
       </element>
       <element id="directory" name="lib">
         <element id="library" level="project" name="Maven: concurrent:concurrent:1.3.4" />
+        <element id="library" level="project" name="Maven: log4j:log4j:1.2.17" />
+        <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.0" />
+        <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.9.9" />
+        <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.0" />
+        <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.9.9" />
       </element>
     </root>
   </artifact>

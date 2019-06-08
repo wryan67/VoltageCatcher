@@ -1,6 +1,6 @@
-<%@ page import="com.acxiom.idmgmt.ejb.*" %>
-<%@ page import="com.acxiom.ccsi.idmgmt.core.Util" %>
+<%@ page import="org.wryan67.vc.common.Util" %>
 <%
+
    if (Util.getInstanceName().equals("prod")  && !request.getRequestURI().contains("monitor.jsp")) {
 //       System.out.println("war request URI="+request.getRequestURI());
 //       System.out.println("war request URL="+request.getRequestURL());
