@@ -6,4 +6,4 @@ Voltage catcher uses a Raspberry Pi and and MCP3008 chip to capture line voltage
 Folders:
 
 * vc - This is the command line version
-* wildfly - This is the Java web interface 
+* wf - This is the Java web interface 

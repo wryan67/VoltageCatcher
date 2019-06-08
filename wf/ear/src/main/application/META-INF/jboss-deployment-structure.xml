@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.0">
+    <deployment>
+        <dependencies>
+            <module name="deployment.txm.ear.txmCommon-1.0.1-SNAPSHOT.jar"   export="true" />
+
+            <module name="com.thoughtworks"          export="true" />
+            <module name="com.oracle"                export="true" />
+            <module name="com.kafka"                 export="true" />
+            <module name="org.codehaus.jackson.jackson-mapper-asl"   export="true" />
+
+
+            <module name="org.apache.commons.lang"   export="true" />
+            <module name="org.apache.cxf"            export="true" />
+            <module name="org.apache.httpcomponents" export="true" />
+            <module name="org.apache.xerces"         export="true" />
+            <module name="org.codehaus.jettison"     export="true" />
+            <module name="org.jboss.as.system-jmx"   export="true" />
+            <module name="org.jboss.as.webservices"  export="true" />
+            <module name="org.jboss.common-core"     export="true" />
+            <module name="org.jboss.logmanager"      export="true" />
+            <module name="org.jboss.remote-naming"   export="true" />
+            <module name="org.jboss.ws.common"       export="true" />
+
+
+            <!--<module name="org.apache.log4j" />-->
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>

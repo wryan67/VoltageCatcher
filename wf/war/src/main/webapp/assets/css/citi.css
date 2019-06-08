@@ -1,0 +1,113 @@
+﻿
+@import "style.css";
+
+h1
+{
+    font-family: Arial;
+    color: #000000;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.14px;
+    line-height: 18px;
+    text-align: left;
+    padding: 0px;
+    margin: 0px;
+    width: auto;
+}
+
+h2
+{
+    font-family: Arial;
+    color: #000000;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.14px;
+    text-align: left;
+    width: auto;
+}
+
+h3
+{
+
+font-family: Interstate;
+color: #004785;
+font-size: 24px;
+font-weight: 700;
+line-height: 19px;
+text-align: center;
+letter-spacing: 0px;
+    width: auto;
+
+margin:0px;
+
+}
+
+/*   Originial Button removed at Citi's Request  */
+
+.button1, .button2
+{
+    text-align: center;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 28px;
+    height:30px;
+    background-repeat: repeat-x;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: inline-block;
+    cursor: pointer;
+    cursor: hand;
+    box-shadow: none;
+    border:none;
+}
+
+.menuButton1
+{
+    text-align: left;
+    width:100%;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 28px;
+    height:30px;
+    background-repeat: repeat-x;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: inline-block;
+    cursor: pointer;
+    cursor: hand;
+    box-shadow: none;
+    border:none;
+}
+
+
+/*
+
+.button1, .button2
+{
+    text-align: center;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 28px;
+    background-repeat: repeat-x;
+    background-color: #2a3a93;
+    height:30px;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: inline-block;
+    cursor: pointer;
+    cursor: hand;
+    box-shadow: none;
+    border:solid;
+    border-color:#C3C3C3;
+    border-width:1px;
+    border-radius: 3px;
+
+}
+ 
+*/

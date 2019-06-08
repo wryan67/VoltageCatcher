@@ -1,0 +1,31 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-ear" name="ear:ear exploded">
+    <output-path>$PROJECT_DIR$/ear/target/idmgmt</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <exploded>true</exploded>
+        <module>ear</module>
+        <packaging>ear</packaging>
+      </options>
+    </properties>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="ear/javaeeApplication/JavaEE" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/ear/target/idmgmt/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="dir-copy" path="$PROJECT_DIR$/ear/src/main/application" />
+      <element id="archive" name="ejb-2019-spock.jar">
+        <element id="artifact" artifact-name="ejb:ejb exploded" />
+      </element>
+      <element id="archive" name="war-2019-spock.war">
+        <element id="artifact" artifact-name="war:war exploded" />
+      </element>
+      <element id="archive" name="common-2019-spock.jar">
+        <element id="module-output" name="common" />
+      </element>
+      <element id="directory" name="lib">
+        <element id="library" level="project" name="Maven: concurrent:concurrent:1.3.4" />
+      </element>
+    </root>
+  </artifact>
+</component>
