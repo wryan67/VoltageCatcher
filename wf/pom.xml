@@ -88,6 +88,15 @@
 
 	<dependencyManagement>
 		<dependencies>
+            <!-- https://mvnrepository.com/artifact/org.wildfly/wildfly-servlet-feature-pack -->
+            <dependency>
+                <groupId>org.wildfly</groupId>
+                <artifactId>wildfly-servlet-feature-pack</artifactId>
+                <version>16.0.0.Final</version>
+                <type>pom</type>
+            </dependency>
+
+
             <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>

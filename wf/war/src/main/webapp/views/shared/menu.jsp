@@ -1,5 +1,5 @@
-<%@ page import="com.acxiom.ccsi.idmgmt.controllers.SettingsController" %>
-<%@ page import="com.acxiom.ccsi.idmgmt.core.Util" %>
+<%@ page import="org.wryan67.vc.common.Util" %>
+<%@ page import="org.wryan67.vc.controllers.SettingsController" %>
 <section>
         <div class="menu">
             <div class="menuLeft">

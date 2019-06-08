@@ -65,6 +65,13 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.wildfly/wildfly-servlet-feature-pack -->
+        <dependency>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-servlet-feature-pack</artifactId>
+            <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
 
 
         <!-- project dependencies -->
