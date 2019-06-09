@@ -39,7 +39,7 @@ public class OptionsModel {
     public Double           triggerVoltage=1.65;
     public String           outputFilename="data.csv";
     public Boolean          headers=true;
-    public Boolean          verbose=true;
+    public Boolean          verbose=false;
     public VCOutputFormat   outputFormat=VCOutputFormat.csv;
 
     @Override
