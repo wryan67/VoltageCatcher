@@ -122,8 +122,17 @@ public class MonitorController {
             }
         }
 
+        if (exists(request, verbose)) {
+            options.verbose=getParameter(request,verbose).equals("true")?true:false;
+        } else {
+            options.verbose=false;
+        }
+
+
         if (exists(request, headers)) {
             options.headers=getParameter(request,headers).equals("true")?true:false;
+        } else {
+            options.headers=false;
         }
 
         if (exists(request, outputFilename)) {
