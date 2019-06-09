@@ -1,8 +1,8 @@
-<%@ page import="com.acxiom.ccsi.idmgmt.constants.AppConstants" %>
-<%@ page import="com.acxiom.ccsi.idmgmt.mbeans.IDMSettingsMBean" %>
-
+<%@ page import="org.wryan67.vc.common.AppConstants" %>
+<%@ page import="org.wryan67.vc.common.jmx.JMX" %>
+<%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
 <%
-    IDMSettingsMBean settings = (IDMSettingsMBean) com.acxiom.txm.jmx.JMX.getMBean("com.acxiom.ccsi.idmgmt.mbeans:service=IDMSettings", IDMSettingsMBean.class);
+    SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
 
     String userMessage=(String)request.getSession().getAttribute("userMessage");
     request.getSession().removeAttribute("userMessage");
@@ -70,26 +70,6 @@
                     <td>Debug Mode</td>
                     <td><input name="debug" type="checkbox" value="true" <%=(settings.isDebug())?"checked":""%>></td>
                 </tr>
-                <tr>
-                    <td>Log Headers</td>
-                    <td><input name="logHeaders" type="checkbox" value="true" <%=(settings.isLogHeaders())?"checked":""%>></td>
-                </tr>
-                <tr>
-                    <td>Log IO</td>
-                    <td><input name="logIO" type="checkbox" value="true" <%=(settings.isLogIO())?"checked":""%>></td>
-                </tr>
-                <tr>
-                    <td>Log CommonTiming</td>
-                    <td><input name="logCommonTiming" type="checkbox" value="true" <%=(settings.isLogCommonTiming())?"checked":""%>></td>
-                </tr>
-
-                <tr>
-                    <td>Shrink Output</td>
-                    <td><input name="shrink" type="checkbox" value="true" <%=(settings.isShrinkOutput())?"checked":""%>></td>
-                </tr>
-
-
-
 
             </table>
             <tr>

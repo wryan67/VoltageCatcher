@@ -1,5 +1,7 @@
 package org.wryan67.vc.controllers;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,4 +41,8 @@ public class SettingsController {
         return (release==null)?"unknown":release;
     }
 
+    public static boolean process(HttpServletRequest request, HttpServletResponse response) {
+
+        return false;
+    }
 }

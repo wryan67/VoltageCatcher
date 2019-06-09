@@ -1,3 +1,4 @@
+<%@ page import="org.wryan67.vc.controllers.SettingsController" %>
 <%@include file="views/shared/env.jsp"%>
 <%
 
