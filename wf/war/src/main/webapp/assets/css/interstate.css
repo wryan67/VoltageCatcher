@@ -1,0 +1,89 @@
+﻿
+
+@font-face
+{
+    font-family: 'Interstate';
+    font-weight: normal;
+    font-style:  normal;
+    src: url('/assets/fonts/interstate/Interstate-Regular.eot')  format('embedded-opentype'),
+         url('/assets/fonts/interstate/Interstate-Regular.woff') format('woff'),
+         url('/assets/fonts/interstate/Interstate-Regular.ttf')  format('truetype'),
+         url('/assets/fonts/interstate/Interstate-Regular.svg')  format('svg');
+}
+
+@font-face
+{
+    font-family: 'Interstate ExtraLight';
+    font-weight: normal;
+    font-style:  normal;
+    src: url('/assets/fonts/interstate/Interstate-ExtraLight.eot')  format('embedded-opentype'), 
+         url('/assets/fonts/interstate/Interstate-ExtraLight.woff') format('woff'), 
+         url('/assets/fonts/interstate/Interstate-ExtraLight.ttf')  format('truetype'), 
+         url('/assets/fonts/interstate/Interstate-ExtraLight.svg')  format('svg');
+}
+
+@font-face
+{
+    font-family: 'Interstate Bold';
+    font-weight: normal;
+    font-style:  normal;
+    src: url('/assets/fonts/interstate/Interstate-Bold.eot')  format('embedded-opentype'),
+         url('/assets/fonts/interstate/Interstate-Bold.woff') format('woff'),
+         url('/assets/fonts/interstate/Interstate-Bold.ttf')  format('truetype'),
+         url('/assets/fonts/interstate/Interstate-Bold.svg')  format('svg');
+}
+
+@font-face
+{
+    font-family: 'Interstate BoldItalic';
+    font-weight: normal;
+    font-style:  normal;
+    src: url('/assets/fonts/interstate/Interstate-BoldItalic.eot')  format('embedded-opentype'),
+         url('/assets/fonts/interstate/Interstate-BoldItalic.woff') format('woff'),
+         url('/assets/fonts/interstate/Interstate-BoldItalic.ttf')  format('truetype'),
+         url('/assets/fonts/interstate/Interstate-BoldItalic.svg')  format('svg');
+}
+
+@font-face
+{
+    font-family: 'Interstate ExtraLightItalic';
+    font-weight: normal;
+    font-style:  normal;
+    src: url('/assets/fonts/interstate/Interstate-ExtraLightItalic.eot')  format('embedded-opentype'),
+         url('/assets/fonts/interstate/Interstate-ExtraLightItalic.woff') format('woff'),
+         url('/assets/fonts/interstate/Interstate-ExtraLightItalic.ttf')  format('truetype'),
+         url('/assets/fonts/interstate/Interstate-ExtraLightItalic.svg')  format('svg');
+}
+
+@font-face
+{
+    font-family: 'Interstate Light';
+    font-weight: normal;
+    font-style:  normal;
+    src: url('/assets/fonts/interstate/Interstate-Light.eot')  format('embedded-opentype'),
+         url('/assets/fonts/interstate/Interstate-Light.woff') format('woff'),
+         url('/assets/fonts/interstate/Interstate-Light.ttf')  format('truetype'),
+         url('/assets/fonts/interstate/Interstate-Light.svg')  format('svg');
+}
+
+@font-face
+{
+    font-family: 'Interstate LightItalic';
+    font-weight: normal;
+    font-style:  normal;
+    src: url('/assets/fonts/interstate/Interstate-LightItalic.eot')  format('embedded-opentype'),
+         url('/assets/fonts/interstate/Interstate-LightItalic.woff') format('woff'),
+         url('/assets/fonts/interstate/Interstate-LightItalic.ttf')  format('truetype'),
+         url('/assets/fonts/interstate/Interstate-LightItalic.svg')  format('svg');
+}
+
+@font-face
+{
+    font-family: 'Interstate RegularItalic';
+    font-weight: normal;
+    font-style:  normal;
+    src: url('/assets/fonts/interstate/Interstate-RegularItalic.eot')  format('embedded-opentype'),
+         url('/assets/fonts/interstate/Interstate-RegularItalic.woff') format('woff'),
+         url('/assets/fonts/interstate/Interstate-RegularItalic.ttf')  format('truetype'),
+         url('/assets/fonts/interstate/Interstate-RegularItalic.svg')  format('svg');
+}
