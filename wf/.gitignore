@@ -1,7 +1,0 @@
-.idea/
-**/target/
-**/*.iml
-**/.*.swp
-**/dependency-reduced-pom.xml
-**/bin/
-scripts/*.log
