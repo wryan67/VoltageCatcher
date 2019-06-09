@@ -52,7 +52,7 @@ public class MonitorController {
         logger.info("capturing data");
         logger.info(options.toString());
 
-        String cmd=String.format("/usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o /tmp/data.csv",
+        String cmd=String.format("sudo /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o /tmp/data.csv",
                 (options.verbose)?"-v":"",
                 (options.headers)?"":"-h",
                 Util.join(options.channels,","),
