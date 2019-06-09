@@ -109,7 +109,7 @@
     setInterval(function() {
         line1.append(new Date().getTime(), Math.random());
         line2.append(new Date().getTime(), Math.random());
-    }, 1000);
+    }, 500);
 
     // Add to SmoothieChart
     smoothie.addTimeSeries(line1);
