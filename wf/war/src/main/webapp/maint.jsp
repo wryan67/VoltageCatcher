@@ -2,6 +2,6 @@
 <jsp:include page="views/shared/layout.jsp">
     <jsp:param name="baseURL"   value="<%=baseURL%>" />
     <jsp:param name="modelForm" value="../forms/maint.jsp"/>
-    <jsp:param name="formWidth" value="1170px" />
+    <jsp:param name="formWidth" value="300px" />
 </jsp:include>
 <!-- test -->

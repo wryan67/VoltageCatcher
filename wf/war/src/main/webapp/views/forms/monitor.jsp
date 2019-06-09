@@ -67,7 +67,7 @@
     <!-- came from <%=request.getServerName()+":"+request.getServerPort()%>  -->
     <br/>
 
-    <canvas id="mycanvas" width="400" height="100"></canvas>
+    <canvas id="mycanvas" width="1000" height="100"></canvas>
 
 
     <form method=post>
