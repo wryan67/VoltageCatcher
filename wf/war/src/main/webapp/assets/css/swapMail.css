@@ -1,0 +1,18 @@
+.tableTitle    { background-color: #203764; color: white; font-size: 12pt; text-align:center; }
+.currentTitle  { background-color: #2F75B5; color: white; }
+.proposedTitle { background-color: #548235; color: white; }
+.blackTitle    { background-color: black;   color: white; }
+.brickRed      { background-color: #800000; color: white; }
+.greyBack      { background-color: #F2F2F2; }
+.darkBlueBold  { background-color: #203764; color: white; font-weight: bold;  }
+.topBorder     { border-top: 1px solid black; }
+.boldFont      { background-color: #203764; color: white; }
+.lightBlueBack { background-color: #DDEBF7; }
+
+body { color: #1F497D; font-family: Calibri, Arial, "Times New Roman" }
+table { border-collapse:collapse; border-color:black }
+th { text-align:left; color:white; background-color:#184D7B; vertical-align: bottom; padding-left: 4px; padding-right:4px }
+td { font-family: courier; font-size: 10pt; padding-left: 4px; padding-right:4px; background-color: #F2F2F2}
+pre { color: black; }
+
+
