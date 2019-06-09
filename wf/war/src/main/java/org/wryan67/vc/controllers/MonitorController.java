@@ -50,8 +50,17 @@ public class MonitorController {
         }
 
         logger.info("capturing data");
-
         logger.info(options.toString());
+
+        String cmd=String.format("/usr/local/bin/vc %s %s -c %s -t %f -f %d -o /tmp/data.csv",
+                (options.verbose)?"-v":"",
+                (options.headers)?"":"-h",
+                Util.join(options.channels,","),
+                options.triggerVoltage, options.frequency
+        );
+
+        logger.info(cmd);
+
 
         return false;
     }
@@ -84,8 +93,10 @@ public class MonitorController {
         if (exists(request, triggerVoltage)) {
             try {
                 options.triggerVoltage=new Double(getParameter(request,triggerVoltage));
-                if (options.triggerVoltage<minTriggerVoltage || options.triggerVoltage>maxTriggerVoltage) {
-                    messages.add("trigger voltage out of valid range");
+                if (options.triggerVoltage!=0.0) {
+                    if (options.triggerVoltage < minTriggerVoltage || options.triggerVoltage > maxTriggerVoltage) {
+                        messages.add("trigger voltage out of valid range");
+                    }
                 }
             } catch (Exception e) {
                 messages.add("trigger voltage contained invalid characters: "+getParameter(request,triggerVoltage));

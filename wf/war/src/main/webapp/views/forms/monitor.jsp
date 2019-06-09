@@ -10,6 +10,7 @@
 <%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.*" %>
 <%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.userOptions" %>
 <%@ page import="org.wryan67.vc.models.OptionsModel" %>
+<%@ page import="org.wryan67.vc.models.VCOutputFormat" %>
 
 <%
     SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
@@ -106,19 +107,34 @@
                     <td><input name="<%=headers%>" type="checkbox" value="true" <%=(options.headers)?"checked":""%>></td>
                     <td>&nbsp;</td>
 
-                    <td>Output filename/td>
-                    <td><input name="<%=outputFilename%>" type="text" value="<%=options.outputFilename%>"></td>
+                    <td>Output filename</td>
+                    <td><input name="<%=outputFilename%>" type="text" value="<%=options.outputFilename%>" ></td>
                     <td>&nbsp;</td>
                 </tr>
+                <tr>
+                    <td>verbose</td>
+                    <td><input name="<%=verbose%>" type="checkbox" value="true" <%=(options.verbose)?"checked":""%>></td>
+                    <td>&nbsp;</td>
 
+                    <td>Output format</td>
+                    <td>
+                        <% for (VCOutputFormat value : VCOutputFormat.values()) { %>
+                            <input type="radio" name="<%=outputFormat%>" value="<%=value%>" <%=(options.outputFormat==value)?"checked":""%>>
+                                <span style="position:relative; top:-5px;">
+                                    <%=value%>
+                                </span>
+                            </input> &nbsp;&nbsp;&nbsp;&nbsp;
+                        <% } %>
+                    </td>
+
+                    <td>&nbsp;</td>
+                </tr>
             </table>
             <tr>
-                <td></td>
-                <td></td>
-                <td>
+                <td colspan="5">
                     <div style="text-align:center; margin-top:15px;margin-bottom:15px;">
                         <button name="buttonAction" onClick="location.href='settings.jsp'" class="button1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
-                            Submit
+                            Capture
                         </button>
                         <%=(userMsg ==null)?"":"<br>"+ userMsg%>
                     </div>

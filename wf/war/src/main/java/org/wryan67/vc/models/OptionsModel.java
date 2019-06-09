@@ -12,6 +12,8 @@ public class OptionsModel {
         channels,
         triggerVoltage,
         headers,
+        verbose,
+        outputFormat,
         outputFilename
     }
 
@@ -30,13 +32,15 @@ public class OptionsModel {
     public static final double minTriggerVoltage=0.5;
     public static final double maxTriggerVoltage=3.4;
 
+    @InputStyle(width=60)
     public Integer          samples=2048;
     public Integer          frequency=10;
     public List<Integer>    channels=new ArrayList<Integer>(){{add(0);add(2);}};
     public Double           triggerVoltage=1.65;
     public String           outputFilename="data.csv";
     public Boolean          headers=true;
-
+    public Boolean          verbose=true;
+    public VCOutputFormat   outputFormat=VCOutputFormat.csv;
 
     @Override
     public String toString() {
