@@ -88,6 +88,14 @@
 
 	<dependencyManagement>
 		<dependencies>
+            <!-- https://mvnrepository.com/artifact/javax.ejb/javax.ejb-api -->
+            <dependency>
+                <groupId>javax.ejb</groupId>
+                <artifactId>javax.ejb-api</artifactId>
+                <version>3.2.2</version>
+            </dependency>
+
+
             <!-- https://mvnrepository.com/artifact/org.wildfly/wildfly-servlet-feature-pack -->
             <dependency>
                 <groupId>org.wildfly</groupId>

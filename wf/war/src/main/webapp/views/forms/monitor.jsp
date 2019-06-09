@@ -1,4 +1,5 @@
 <%@ page import="org.wryan67.vc.common.AppConstants" %>
+<%@ page import="org.wryan67.vc.common.Util" %>
 <%@ page import="org.wryan67.vc.common.jmx.JMX" %>
 <%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
 <%
@@ -9,6 +10,8 @@
 
     String mc1sel="";
     String mc2sel="";
+
+    boolean debug = settings.getDebug();
 
 %>
 <style>
@@ -56,8 +59,7 @@
 
 <div class="genericForm" style='width:${param.formWidth}'>
     <h1><%=AppConstants.appTitle%></h1>
-    <h2>Resource Access Control Center</h2>
-    <h1>Settings</h1>
+    <h2>Settings</h2>
     <!-- came from <%=request.getServerName()+":"+request.getServerPort()%>  -->
     <br/>
 
@@ -68,7 +70,7 @@
             <table>
                 <tr>
                     <td>Debug Mode</td>
-                    <td><input name="debug" type="checkbox" value="true" <%=(settings.isDebug())?"checked":""%>></td>
+                    <td><input name="debug" type="checkbox" value="true" <%=(debug)?"checked":""%>></td>
                 </tr>
 
             </table>

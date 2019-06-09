@@ -56,8 +56,7 @@
 
 <div class="genericForm" style='width:${param.formWidth}'>
     <h1><%=AppConstants.appTitle%></h1>
-    <h2>Resource Access Control Center</h2>
-    <h1>Settings</h1>
+    <h2>Settings</h2>
     <!-- came from <%=request.getServerName()+":"+request.getServerPort()%>  -->
     <br/>
 
@@ -68,7 +67,7 @@
             <table>
                 <tr>
                     <td>Debug Mode</td>
-                    <td><input name="debug" type="checkbox" value="true" <%=(settings.isDebug())?"checked":""%>></td>
+                    <td><input name="debug" type="checkbox" value="true" <%=(settings.getDebug())?"checked":""%>></td>
                 </tr>
 
             </table>
