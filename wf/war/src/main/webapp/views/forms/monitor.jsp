@@ -95,7 +95,7 @@
                 </tr>
                 <tr>
                     <td>Samples (1-40000)</td>
-                    <td><input name="<%=triggerVoltage%>" type="text" value="<%=options.samples%>" ></td>
+                    <td><input name="<%=samples%>" type="text" value="<%=options.samples%>" ></td>
                     <td>&nbsp;</td>
 
                     <td>Channels (0-7) csv</td>

@@ -18,7 +18,7 @@ public class OptionsModel {
     }
 
     public static final int minSamples=2;
-    public static final int maxSamples=2;
+    public static final int maxSamples=40000;
 
     public static final int minFrequency=5;
     public static final int maxFrequency=75;

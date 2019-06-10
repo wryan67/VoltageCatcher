@@ -123,7 +123,7 @@ public class MonitorController {
             try {
                 options.samples=new Integer(getParameter(request,samples));
                 if (options.samples<minSamples || options.samples>maxSamples) {
-                    messages.add("samples out of valid range");
+                    messages.add(String.format("samples out of valid range: [%d-%d]",minSamples,maxSamples));
                 }
             } catch (Exception e) {
                 messages.add("samples contains invalid characters: "+getParameter(request,samples));
