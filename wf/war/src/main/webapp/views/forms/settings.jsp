@@ -1,11 +1,14 @@
 <%@ page import="org.wryan67.vc.common.AppConstants" %>
 <%@ page import="org.wryan67.vc.common.jmx.JMX" %>
 <%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
+<%@ page import="org.wryan67.vc.controllers.SessionData" %>
+<%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.userMessage" %>
+
 <%
     SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
 
-    String userMessage=(String)request.getSession().getAttribute("userMessage");
-    request.getSession().removeAttribute("userMessage");
+    String userMsg = SessionData.getValueAndRemove(request, userMessage);
+
 
     String mc1sel="";
     String mc2sel="";
@@ -56,8 +59,7 @@
 
 <div class="genericForm" style='width:${param.formWidth}'>
     <h1><%=AppConstants.appTitle%></h1>
-    <h2>Resource Access Control Center</h2>
-    <h1>Settings</h1>
+    <h2>Settings</h2>
     <!-- came from <%=request.getServerName()+":"+request.getServerPort()%>  -->
     <br/>
 
@@ -68,7 +70,7 @@
             <table>
                 <tr>
                     <td>Debug Mode</td>
-                    <td><input name="debug" type="checkbox" value="true" <%=(settings.isDebug())?"checked":""%>></td>
+                    <td><input name="debug" type="checkbox" value="true" <%=(settings.getDebug())?"checked":""%>></td>
                 </tr>
 
             </table>
@@ -80,7 +82,7 @@
                     <button name="buttonAction" onClick="location.href='settings.jsp'" class="button1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
                          Apply
                     </button>
-                    <%=(userMessage==null)?"":"<br>"+userMessage%>
+                    <%=(userMsg ==null)?"":"<br>"+ userMsg%>
                 </div>
               </td>
             </tr>

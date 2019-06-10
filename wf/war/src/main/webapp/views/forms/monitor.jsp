@@ -1,16 +1,35 @@
 <%@ page import="org.wryan67.vc.common.AppConstants" %>
+<%@ page import="org.wryan67.vc.common.Util" %>
 <%@ page import="org.wryan67.vc.common.jmx.JMX" %>
+
+<%@ page import="org.wryan67.vc.controllers.SessionData" %>
+<%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.frequency" %>
+<%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.userMessage" %>
 <%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
+<%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.triggerVoltage" %>
+<%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.*" %>
+<%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.userOptions" %>
+<%@ page import="org.wryan67.vc.models.OptionsModel" %>
+<%@ page import="org.wryan67.vc.models.VCOutputFormat" %>
+
 <%
     SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
 
-    String userMessage=(String)request.getSession().getAttribute("userMessage");
-    request.getSession().removeAttribute("userMessage");
+    String userMsg = SessionData.getValueAndRemove(request, userMessage);
+
+    OptionsModel options = SessionData.getValueOrDefault(request, userOptions, new OptionsModel());
+
 
     String mc1sel="";
     String mc2sel="";
 
+    boolean debug = settings.getDebug();
+
 %>
+
+<script type="text/javascript" src="${param.baseURL}/assets/js/smoothie.js"></script>
+
+
 <style>
     .boxcheck {
         margin-top: 4px;
@@ -56,31 +75,68 @@
 
 <div class="genericForm" style='width:${param.formWidth}'>
     <h1><%=AppConstants.appTitle%></h1>
-    <h2>Resource Access Control Center</h2>
-    <h1>Settings</h1>
-    <!-- came from <%=request.getServerName()+":"+request.getServerPort()%>  -->
-    <br/>
+    <h2>Monitor/Catcher</h2>
+
+    <canvas id="mycanvas" width="1000" height="100"></canvas>
 
     <form method=post>
-        <input type=hidden name=action value="update">
+        <input type=hidden name=action value="capture">
         <table>
 
             <table>
                 <tr>
-                    <td>Debug Mode</td>
-                    <td><input name="debug" type="checkbox" value="true" <%=(settings.isDebug())?"checked":""%>></td>
-                </tr>
+                    <td>Frequency (5-75) kHz</td>
+                    <td><input name="<%=frequency%>" type="text" value="<%=options.frequency%>" ></td>
+                    <td>&nbsp;</td>
 
+                    <td>Trigger voltage</td>
+                    <td><input name="<%=triggerVoltage%>" type="text" value="<%=options.triggerVoltage%>" ></td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Samples (1-40000)</td>
+                    <td><input name="<%=samples%>" type="text" value="<%=options.samples%>" ></td>
+                    <td>&nbsp;</td>
+
+                    <td>Channels (0-7) csv</td>
+                    <td><input name="<%=channels%>" type="text" value="<%=Util.join(options.channels,",")%>" ></td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Headers</td>
+                    <td><input name="<%=headers%>" type="checkbox" value="true" <%=(options.headers)?"checked":""%>></td>
+                    <td>&nbsp;</td>
+
+                    <td>Output filename</td>
+                    <td><input name="<%=outputFilename%>" type="text" value="<%=options.outputFilename%>" ></td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>verbose</td>
+                    <td><input name="<%=verbose%>" type="checkbox" value="true" <%=(options.verbose)?"checked":""%>></td>
+                    <td>&nbsp;</td>
+
+                    <td>Output format</td>
+                    <td>
+                        <% for (VCOutputFormat value : VCOutputFormat.values()) { %>
+                            <input type="radio" name="<%=outputFormat%>" value="<%=value%>" <%=(options.outputFormat==value)?"checked":""%>>
+                                <span style="position:relative; top:-5px;">
+                                    <%=value%>
+                                </span>
+                            </input> &nbsp;&nbsp;&nbsp;&nbsp;
+                        <% } %>
+                    </td>
+
+                    <td>&nbsp;</td>
+                </tr>
             </table>
             <tr>
-                <td></td>
-                <td></td>
-                <td>
+                <td colspan="5">
                     <div style="text-align:center; margin-top:15px;margin-bottom:15px;">
                         <button name="buttonAction" onClick="location.href='settings.jsp'" class="button1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
-                            Apply
+                            Capture
                         </button>
-                        <%=(userMessage==null)?"":"<br>"+userMessage%>
+                        <%=(userMsg ==null)?"":"<br>"+ userMsg%>
                     </div>
                 </td>
             </tr>
@@ -88,4 +144,37 @@
     </form>
 </div>
 
+<script>
+    var smoothie = new SmoothieChart();
+    smoothie.streamTo(document.getElementById("mycanvas"));
 
+    // Data
+    var line1 = new TimeSeries();
+    var line2 = new TimeSeries();
+
+    // Add a random value to each line every second
+    setInterval(function() {
+        line1.append(new Date().getTime(), Math.random());
+        line2.append(new Date().getTime(), Math.random());
+    }, 500);
+
+    // Add to SmoothieChart
+    smoothie.addTimeSeries(line1);
+    smoothie.addTimeSeries(line2);
+
+    smoothie.streamTo(document.getElementById("mycanvas"), 1000 /*delay*/);
+
+</script>
+
+<%  if (SessionData.exists(request, SessionData.SessionVar.file2download)) { %>
+
+    <script>
+        // var xhr = new XMLHttpRequest();
+        // xhr.open("GET", "download");
+        // xhr.send();
+
+        window.location="download";
+    </script>
+
+
+<% } %>

@@ -7,13 +7,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1">
 
-    <title>Citi</title>
+    <title>Voltage Catcher</title>
 
 
 
     <link rel="stylesheet" href="${param.baseURL}/assets/css/bootstrap.css" />
     <link rel="stylesheet" href="${param.baseURL}/assets/css/jquery.bootgrid.css" />
-    <link rel="stylesheet" href="${param.baseURL}/assets/css/citi.css" />
+    <link rel="stylesheet" href="${param.baseURL}/assets/css/vc.css" />
 
     <script src="${param.baseURL}/assets/js/moderniz.2.8.1.js"></script>
     <script src="${param.baseURL}/assets/js/jquery-3.3.1.min.js"></script>
