@@ -136,7 +136,10 @@
                         <button name="buttonAction" onClick="location.href='settings.jsp'" class="button1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
                             Capture
                         </button>
-                        <%=(userMsg ==null)?"":"<br>"+ userMsg%>
+                        <% if (userMsg!=null) { %>
+                          <br><%=userMsg%>
+                          <img src="chart.jpg">
+                        <%}%>
                     </div>
                 </td>
             </tr>
