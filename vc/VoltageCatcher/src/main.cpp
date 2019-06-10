@@ -461,14 +461,16 @@ int main(int argc, char **argv)
 	fflush(stdout);
 	fflush(stderr);
 
-	if (max < options.triggerVoltage) {
-		fprintf(stderr, "variant voltage is lower than specified trigger\n");
-		exit(0);
-	}
+	if (options.triggerVoltage > 0) {
+		if (max < options.triggerVoltage) {
+			fprintf(stderr, "variant voltage is lower than specified trigger, max=%f\n",max);
+			exit(0);
+		}
 
-	if (min > options.triggerVoltage) {
-		fprintf(stderr, "variant voltage is higher than specified trigger\n");
-		exit(0);
+		if (min > options.triggerVoltage) {
+			fprintf(stderr, "variant voltage is higher than specified trigger, min=%f\n", min);
+			exit(0);
+		}
 	}
 
 
