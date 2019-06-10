@@ -8,13 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.wryan67.vc.controllers.SessionData.SessionVar.userMessage;
+import static org.wryan67.vc.controllers.SessionData.SessionVar.*;
 import static org.wryan67.vc.models.OptionsModel.OptionFields.*;
 import static org.wryan67.vc.models.OptionsModel.*;
 
@@ -52,9 +51,7 @@ public class MonitorController {
     private static boolean capture(HttpServletRequest request, HttpServletResponse response) {
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
-        try {
-            new File("/tmp/data.csv").delete();
-        } catch (Exception e) {}
+        SessionData.setValue(request, status, "failed");
 
         if (!validInput(request,options)) {
             return false;
@@ -77,6 +74,7 @@ public class MonitorController {
 
             Process p = Runtime.getRuntime().exec(cmd);
 
+
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
@@ -89,8 +87,17 @@ public class MonitorController {
                 messages.add(s);
             }
 
+            try {
+                p.waitFor();
+            } catch (InterruptedException e) {}
+
             SessionData.setValue(request, SessionData.SessionVar.file2download,"/tmp/data.csv");
             blockResponse(request,messages);
+
+            if (p.exitValue()==0) {
+                SessionData.setValue(request, status, "success");
+            }
+
             return false;
         } catch (IOException e) {
             logger.error("system command failed",e);

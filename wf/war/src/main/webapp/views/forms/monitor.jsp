@@ -4,13 +4,14 @@
 
 <%@ page import="org.wryan67.vc.controllers.SessionData" %>
 <%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.frequency" %>
-<%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.userMessage" %>
+<%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.*" %>
 <%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
 <%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.triggerVoltage" %>
 <%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.*" %>
 <%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.userOptions" %>
 <%@ page import="org.wryan67.vc.models.OptionsModel" %>
 <%@ page import="org.wryan67.vc.models.VCOutputFormat" %>
+<%@ page import="static java.lang.Boolean.FALSE" %>
 
 <%
     SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
@@ -24,6 +25,7 @@
     String mc2sel="";
 
     boolean debug = settings.getDebug();
+    boolean success = SessionData.getValueOrDefault(request,status,"failed").equals("success");
 
 %>
 
@@ -138,8 +140,9 @@
                         <button name="buttonAction" onClick="location.href='settings.jsp'" class="button1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
                             Capture
                         </button>
-                        <% if (userMsg!=null) { %>
-                          <br><%=userMsg%>
+                        <%=(userMsg==null)?"":"<br>"+userMsg%>
+
+                        <% if (success) { %>
                           <img src="chart.jpg">
                         <%}%>
                     </div>

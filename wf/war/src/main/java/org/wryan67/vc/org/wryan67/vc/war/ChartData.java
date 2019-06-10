@@ -1,10 +1,11 @@
 package org.wryan67.vc.org.wryan67.vc.war;
 
 import org.apache.log4j.Logger;
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -38,15 +39,27 @@ public class ChartData extends HttpServlet {
 
             XYDataset dataset = loadData();
 
+            NumberAxis xAxis = new NumberAxis("microseconds");
+            NumberAxis yAxis = new NumberAxis("Volts");
 
-            JFreeChart chart = ChartFactory.createScatterPlot(
-                    "Voltage Catcher",
-                    "microseconds", "Volts", dataset);
+            XYSplineRenderer renderer = new XYSplineRenderer();
+//            XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+//            XYItemRenderer renderer = new XYStepRenderer();
 
-            XYPlot plot = (XYPlot)chart.getPlot();
+            renderer.setShapesVisible(false);
+//            renderer.setSeriesShapesVisible();
+
+            XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
+
+//            JFreeChart chart = ChartFactory.createXYStepChart(
+//                    "Voltage Catcher",
+//                    "microseconds", "Volts", dataset);
+//            XYPlot plot = (XYPlot)chart.getPlot();
+
             plot.setBackgroundPaint(new Color(238,238,238));
 
 
+            JFreeChart chart = new JFreeChart("Voltage Catcher", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
 
             ChartUtilities.writeChartAsJPEG(response.getOutputStream(),chart, 1125,300);
 
@@ -106,6 +119,7 @@ public class ChartData extends HttpServlet {
             XYSeries lineplot = new XYSeries(label);
             series.add(lineplot);
             dataset.addSeries(lineplot);
+
         }
 
         do {
