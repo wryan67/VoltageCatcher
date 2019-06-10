@@ -102,7 +102,7 @@ public class ChartData extends HttpServlet {
         ArrayList<XYSeries> series = new ArrayList<XYSeries>(channels);
 
         for (int c=0; c<channels; ++c) {
-            String label=(hasHeaders)?headers[c+firstChannel]:"volts-" + c;
+            String label=(hasHeaders)?headers[c+firstChannel].replace("volts","channel"):"volts-" + c;
             XYSeries lineplot = new XYSeries(label);
             series.add(lineplot);
             dataset.addSeries(lineplot);
