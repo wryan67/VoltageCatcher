@@ -1,7 +1,7 @@
 .idea/
 **/target/
 **/*.iml
-**/.*.swp
+**/*.swp
 **/dependency-reduced-pom.xml
 **/bin/
 scripts/*.log
