@@ -78,7 +78,7 @@ public class MonitorController {
 
             String s;
             while ((s = stdInput.readLine()) != null) {
-                messages.add(s);
+                messages.add(s.replaceAll("elapsed.*s=","elapsed &micro;s="));
             }
 
             while ((s = stdError.readLine()) != null) {
