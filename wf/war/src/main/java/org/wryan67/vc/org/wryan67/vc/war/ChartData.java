@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -40,7 +41,7 @@ public class ChartData extends HttpServlet {
             response.setContentType("img");
 
 
-            XYDataset dataset = loadData();
+            XYDataset dataset = loadData(options);
 
             NumberAxis xAxis = new NumberAxis("microseconds");
             NumberAxis yAxis = new NumberAxis("Volts");
@@ -62,9 +63,14 @@ public class ChartData extends HttpServlet {
                     renderer.setShapesVisible(false);
                 } break;
                 case scatter: {
+//                    Rectangle rectangle = new Rectangle(2,2);
+//                    Shape x = ShapeUtilities.createDiagonalCross(3, 1);
+
+                    Shape marker = new Ellipse2D.Double(1,1,1,1);
                     renderer = new XYLineAndShapeRenderer();
                     renderer.setShapesVisible(true);
                     renderer.setLinesVisible(false);
+                    renderer.setShape(marker);
                 } break;
             }
 
@@ -81,7 +87,7 @@ public class ChartData extends HttpServlet {
         }
     }
 
-    private XYDataset loadData() throws IOException {
+    private XYDataset loadData(OptionsModel options) throws IOException {
         XYSeriesCollection dataset = new XYSeriesCollection();
 
         BufferedReader input = new BufferedReader(new FileReader("/tmp/data.csv"));
@@ -128,7 +134,7 @@ public class ChartData extends HttpServlet {
         ArrayList<XYSeries> series = new ArrayList<XYSeries>(channels);
 
         for (int c=0; c<channels; ++c) {
-            String label=(hasHeaders)?headers[c+firstChannel].replace("volts","channel"):"volts-" + c;
+            String label=(hasHeaders)?headers[c+firstChannel].replace("volts","channel"):"channel-" + options.channels.get(c);
             XYSeries lineplot = new XYSeries(label);
             series.add(lineplot);
             dataset.addSeries(lineplot);
