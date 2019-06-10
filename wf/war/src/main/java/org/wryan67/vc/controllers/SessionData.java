@@ -9,7 +9,8 @@ public class SessionData {
     public enum SessionVar {
         userMessage,
         file2download,
-        status, userOptions
+        status,
+        userOptions;
     }
 
 

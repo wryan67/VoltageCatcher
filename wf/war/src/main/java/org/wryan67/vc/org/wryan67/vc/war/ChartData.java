@@ -5,7 +5,9 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
+import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -37,27 +39,38 @@ public class ChartData extends HttpServlet {
         try {
             response.setContentType("img");
 
+
             XYDataset dataset = loadData();
 
             NumberAxis xAxis = new NumberAxis("microseconds");
             NumberAxis yAxis = new NumberAxis("Volts");
 
-            XYSplineRenderer renderer = new XYSplineRenderer();
-//            XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-//            XYItemRenderer renderer = new XYStepRenderer();
+            XYLineAndShapeRenderer renderer=null;
 
-            renderer.setShapesVisible(false);
-//            renderer.setSeriesShapesVisible();
+
+            switch (options.chartType) {
+                case spline: {
+                    renderer = new XYSplineRenderer();
+                    renderer.setShapesVisible(false);
+                }   break;
+                case line: {
+                    renderer = new XYLineAndShapeRenderer();
+                    renderer.setShapesVisible(false);
+                }   break;
+                case stepped: {
+                    renderer = new XYStepRenderer();
+                    renderer.setShapesVisible(false);
+                } break;
+                case scatter: {
+                    renderer = new XYLineAndShapeRenderer();
+                    renderer.setShapesVisible(true);
+                    renderer.setLinesVisible(false);
+                } break;
+            }
 
             XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 
-//            JFreeChart chart = ChartFactory.createXYStepChart(
-//                    "Voltage Catcher",
-//                    "microseconds", "Volts", dataset);
-//            XYPlot plot = (XYPlot)chart.getPlot();
-
             plot.setBackgroundPaint(new Color(238,238,238));
-
 
             JFreeChart chart = new JFreeChart("Voltage Catcher", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
 

@@ -3,6 +3,7 @@ package org.wryan67.vc.controllers;
 import org.apache.log4j.Logger;
 import org.wryan67.vc.common.Util;
 import org.wryan67.vc.models.OptionsModel;
+import org.wryan67.vc.models.SupportedChartTypes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,7 +54,7 @@ public class MonitorController {
 
         SessionData.setValue(request, status, "failed");
 
-        if (!validInput(request,options)) {
+        if (!validateInput(request,options)) {
             return false;
         }
 
@@ -127,7 +128,7 @@ public class MonitorController {
         SessionData.setValue(request, userMessage, rs.toString());
     }
 
-    private static boolean validInput(HttpServletRequest request, OptionsModel options) {
+    private static boolean validateInput(HttpServletRequest request, OptionsModel options) {
         List<String> messages=new ArrayList<>();
 
         if (exists(request, samples)) {
@@ -195,6 +196,11 @@ public class MonitorController {
             options.headers=getParameter(request,headers).equals("true")?true:false;
         } else {
             options.headers=false;
+        }
+
+
+        if (exists(request, chartType)) {
+            options.chartType = SupportedChartTypes.valueOf(getParameter(request,chartType));
         }
 
         if (exists(request, outputFilename)) {

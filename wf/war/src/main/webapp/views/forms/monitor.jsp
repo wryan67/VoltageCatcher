@@ -3,15 +3,14 @@
 <%@ page import="org.wryan67.vc.common.jmx.JMX" %>
 
 <%@ page import="org.wryan67.vc.controllers.SessionData" %>
-<%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.frequency" %>
-<%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.*" %>
-<%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
-<%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.triggerVoltage" %>
 <%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.*" %>
+<%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
+<%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.*" %>
 <%@ page import="static org.wryan67.vc.controllers.SessionData.SessionVar.userOptions" %>
 <%@ page import="org.wryan67.vc.models.OptionsModel" %>
 <%@ page import="org.wryan67.vc.models.VCOutputFormat" %>
 <%@ page import="static java.lang.Boolean.FALSE" %>
+<%@ page import="org.wryan67.vc.models.SupportedChartTypes" %>
 
 <%
     SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
@@ -86,60 +85,77 @@
     <form method=post>
         <input type=hidden name=action value="capture">
         <table>
+            <tr>
+                <td>Frequency (5-75) kHz</td>
+                <td><input name="<%=frequency%>" type="text" value="<%=options.frequency%>" ></td>
+                <td>&nbsp;</td>
 
-            <table>
-                <tr>
-                    <td>Frequency (5-75) kHz</td>
-                    <td><input name="<%=frequency%>" type="text" value="<%=options.frequency%>" ></td>
-                    <td>&nbsp;</td>
+                <td>Trigger voltage</td>
+                <td><input name="<%=triggerVoltage%>" type="text" value="<%=options.triggerVoltage%>" ></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>Samples (1-40000)</td>
+                <td><input name="<%=samples%>" type="text" value="<%=options.samples%>" ></td>
+                <td>&nbsp;</td>
 
-                    <td>Trigger voltage</td>
-                    <td><input name="<%=triggerVoltage%>" type="text" value="<%=options.triggerVoltage%>" ></td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>Samples (1-40000)</td>
-                    <td><input name="<%=samples%>" type="text" value="<%=options.samples%>" ></td>
-                    <td>&nbsp;</td>
+                <td>Channels (0-7) csv</td>
+                <td><input name="<%=channels%>" type="text" value="<%=Util.join(options.channels,",")%>" ></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>Headers</td>
+                <td><input name="<%=headers%>" type="checkbox" value="true" <%=(options.headers)?"checked":""%>></td>
+                <td>&nbsp;</td>
 
-                    <td>Channels (0-7) csv</td>
-                    <td><input name="<%=channels%>" type="text" value="<%=Util.join(options.channels,",")%>" ></td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>Headers</td>
-                    <td><input name="<%=headers%>" type="checkbox" value="true" <%=(options.headers)?"checked":""%>></td>
-                    <td>&nbsp;</td>
+                <td>Output filename</td>
+                <td><input name="<%=outputFilename%>" type="text" value="<%=options.outputFilename%>" ></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>verbose</td>
+                <td><input name="<%=verbose%>" type="checkbox" value="true" <%=(options.verbose)?"checked":""%>></td>
+                <td>&nbsp;</td>
 
-                    <td>Output filename</td>
-                    <td><input name="<%=outputFilename%>" type="text" value="<%=options.outputFilename%>" ></td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>verbose</td>
-                    <td><input name="<%=verbose%>" type="checkbox" value="true" <%=(options.verbose)?"checked":""%>></td>
-                    <td>&nbsp;</td>
+                <td>Output format</td>
+                <td>
+                    <% for (VCOutputFormat value : VCOutputFormat.values()) { %>
+                        <input type="radio" name="<%=outputFormat%>" value="<%=value%>" <%=(options.outputFormat==value)?"checked":""%>>
+                            <span style="position:relative; top:-5px;">
+                                <%=value%>
+                            </span>
+                        </input> &nbsp;&nbsp;&nbsp;&nbsp;
+                    <% } %>
+                </td>
 
-                    <td>Output format</td>
-                    <td>
-                        <% for (VCOutputFormat value : VCOutputFormat.values()) { %>
-                            <input type="radio" name="<%=outputFormat%>" value="<%=value%>" <%=(options.outputFormat==value)?"checked":""%>>
-                                <span style="position:relative; top:-5px;">
-                                    <%=value%>
-                                </span>
-                            </input> &nbsp;&nbsp;&nbsp;&nbsp;
-                        <% } %>
-                    </td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>Chart type</td>
+                <td>
+                    <% for (SupportedChartTypes value : SupportedChartTypes.values()) { %>
+                    <input type="radio" name="<%=chartType%>" value="<%=value%>" <%=(options.chartType==value)?"checked":""%>>
+                    <span style="position:relative; top:-5px;">
+                                <%=value%>
+                            </span>
+                    </input> &nbsp;&nbsp;&nbsp;&nbsp;
+                    <% } %>
+                </td>
 
-                    <td>&nbsp;</td>
-                </tr>
-            </table>
+                <td>&nbsp;</td>
+            </tr>
             <tr>
                 <td colspan="5">
                     <div style="text-align:center; margin-top:15px;margin-bottom:15px;">
                         <button name="buttonAction" onClick="location.href='settings.jsp'" class="button1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
                             Capture
                         </button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <div>
                         <%=(userMsg==null)?"":"<br>"+userMsg%>
 
                         <% if (success) { %>
