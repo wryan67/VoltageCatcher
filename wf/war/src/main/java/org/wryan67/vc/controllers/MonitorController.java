@@ -6,6 +6,10 @@ import org.wryan67.vc.models.OptionsModel;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.SkipPageException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,9 +22,10 @@ public class MonitorController {
 
 
     private static final Logger logger=Logger.getLogger(MonitorController.class);
+    private static final String thisPage="monitor.jsp";
 
 
-    public static boolean process(HttpServletRequest request, HttpServletResponse response) {
+    public static boolean process(HttpServletRequest request, HttpServletResponse response) throws SkipPageException {
         String action=request.getParameter("action");
 
         logger.info("monitor action="+action);
@@ -34,12 +39,14 @@ public class MonitorController {
             case "capture": {
                 return capture(request, response);
             }
+
             default:
                 SessionData.setValue(request, userMessage, "Unknown method called");
                 return false;
         }
 
     }
+
 
     private static boolean capture(HttpServletRequest request, HttpServletResponse response) {
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
@@ -60,9 +67,53 @@ public class MonitorController {
         );
 
         logger.info(cmd);
+        List<String> messages=new ArrayList<>();
+
+        try {
+
+            Process p = Runtime.getRuntime().exec(cmd);
+
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+            String s;
+            while ((s = stdInput.readLine()) != null) {
+                messages.add(s);
+            }
+
+            while ((s = stdError.readLine()) != null) {
+                messages.add(s);
+            }
+
+            SessionData.setValue(request, SessionData.SessionVar.file2download,"/tmp/data.csv");
+            blockResponse(request,messages);
+            return false;
+        } catch (IOException e) {
+            logger.error("system command failed",e);
+            messages.add("capture failed: "+e.getMessage());
+            blockResponse(request,messages);
+
+            return false;
+        }
 
 
-        return false;
+
+
+
+    }
+
+    private static void blockResponse(HttpServletRequest request, List<String> messages) {
+        StringBuilder rs=new StringBuilder(1024);
+
+        rs.append("<br/><div style='text-align:left'>\n");
+        rs.append("<pre>");
+
+        rs.append(Util.join(messages,"\n"));
+
+        rs.append("</pre>");
+        rs.append("</div>");
+
+        SessionData.setValue(request, userMessage, rs.toString());
     }
 
     private static boolean validInput(HttpServletRequest request, OptionsModel options) {
@@ -150,9 +201,7 @@ public class MonitorController {
         if (messages.size()<1) {
             return true;
         } else {
-
-            SessionData.setValue(request,userMessage,"<br>"+Util.join(messages,"<br>"));
-
+            blockResponse(request, messages);
             return false;
         }
 

@@ -1,11 +1,9 @@
 <%@ page import="org.wryan67.vc.controllers.MonitorController" %>
-<%@include file="views/shared/env.jsp"%>
-<%
+<%@include file="views/shared/env.jsp"%><%
 
     if (MonitorController.process(request, response)) {
-        return;
+        throw new javax.servlet.jsp.SkipPageException();
     }
-
 %>
 <jsp:include page="views/shared/layout.jsp">
     <jsp:param name="baseURL"   value="<%=baseURL%>" />

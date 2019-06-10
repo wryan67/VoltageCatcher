@@ -166,3 +166,15 @@
 
 </script>
 
+<%  if (SessionData.exists(request, SessionData.SessionVar.file2download)) { %>
+
+    <script>
+        // var xhr = new XMLHttpRequest();
+        // xhr.open("GET", "download");
+        // xhr.send();
+
+        window.location="download";
+    </script>
+
+
+<% } %>

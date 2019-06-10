@@ -8,6 +8,7 @@ public class SessionData {
 
     public enum SessionVar {
         userMessage,
+        file2download,
         userOptions
     }
 
@@ -15,6 +16,12 @@ public class SessionData {
     public static <Type> Type getValue(HttpServletRequest request, SessionVar name) {
         return (Type)request.getSession().getAttribute(name.toString());
     }
+
+    public static boolean exists(HttpServletRequest request, SessionVar name) {
+        return (request.getSession().getAttribute(name.toString())==null)?false:true;
+    }
+
+
 
 
     public static <Type> Type getValueOrDefault(HttpServletRequest request, SessionVar name, Type newValue) {
