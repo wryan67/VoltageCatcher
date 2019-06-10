@@ -147,6 +147,7 @@
     </form>
 </div>
 
+<!--
 <script>
     var smoothie = new SmoothieChart();
     smoothie.streamTo(document.getElementById("mycanvas"));
@@ -168,6 +169,7 @@
     smoothie.streamTo(document.getElementById("mycanvas"), 1000 /*delay*/);
 
 </script>
+-->
 
 <%  if (SessionData.exists(request, SessionData.SessionVar.file2download)) { %>
 
