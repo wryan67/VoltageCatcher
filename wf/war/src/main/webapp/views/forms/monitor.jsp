@@ -77,7 +77,9 @@
     <h1><%=AppConstants.appTitle%></h1>
     <h2>Monitor/Catcher</h2>
 
+<!--
     <canvas id="mycanvas" width="1000" height="100"></canvas>
+-->
 
     <form method=post>
         <input type=hidden name=action value="capture">

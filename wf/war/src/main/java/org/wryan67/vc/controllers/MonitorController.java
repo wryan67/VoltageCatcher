@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -51,6 +52,9 @@ public class MonitorController {
     private static boolean capture(HttpServletRequest request, HttpServletResponse response) {
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
+        try {
+            new File("/tmp/data.csv").delete();
+        } catch (Exception e) {}
 
         if (!validInput(request,options)) {
             return false;
