@@ -28,6 +28,7 @@ public:
 	int   triggerVector = 1;
 	bool  triggerMet = false;
 
+	bool daemon = false;
 	bool suppressHeaders = false;
 	bool verboseOutput = false;
 

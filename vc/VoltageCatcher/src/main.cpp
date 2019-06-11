@@ -335,10 +335,45 @@ bool checkTrigger(float volts) {
 	}
 }
 
+void breakOut(int out) {
+	if (out < 1) {
+		fclose(options.sampleFile);
+		exit(0);
+	}
+}
+
+volatile static long long daemonSample = 0;
+
 void takeSampleActivation(void) {
 	piLock(1);
 
 	if (options.sampelingActive) {
+
+		if (options.daemon) {
+
+			for (int i = 0; channels[i] >= 0; ++i) {
+				takeSample(i);
+			}
+
+
+			breakOut(fprintf(options.sampleFile, "%lld,%lld", daemonSample++,  samples[options.sampleIndex][channels[0]].timestamp.count() - samples[0][channels[0]].timestamp.count()));
+
+			for (int i = 0; channels[i] >= 0; ++i) {
+				breakOut(fprintf(options.sampleFile, ",%f", samples[options.sampleIndex][channels[i]].volts));
+			}
+
+			breakOut(fprintf(options.sampleFile, "\n")); 
+
+			if (options.sampleIndex == 0) {
+				++options.sampleIndex;
+			}
+
+
+			piUnlock(1);
+			return;
+		}
+
+
 		float volts=takeSample( 0 );
 
 		if (!options.triggerMet) {
@@ -389,10 +424,9 @@ int main(int argc, char **argv)
 
 	options.sampleFile = fopen(options.sampleFileName, "w");
 	if (options.sampleFile == NULL) {
-		fprintf(stderr,"cannot open output file '%s': %s\n", options.sampleFileName, strerror(errno));
+		fprintf(stderr, "cannot open output file '%s': %s\n", options.sampleFileName, strerror(errno));
 		exit(2);
 	}
-
 
 	if (!setup()) {
 		printf("setup failed\n");
@@ -400,6 +434,10 @@ int main(int argc, char **argv)
 	}
 
 	printf("setup event triggers\n");
+
+
+	printf("output file: %s\n", options.sampleFileName);
+	printf("daemon mode: %s\n", (options.daemon)?"true":"false");
 
 
 

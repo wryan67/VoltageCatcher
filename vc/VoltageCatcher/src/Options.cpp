@@ -6,15 +6,16 @@ void Options::usage() {
 	fprintf(stderr, "  Options:\n");
 	fprintf(stderr, "  -c = channels [0-%d],[0-%d],etc.\n", MCP3008_CHANNELS-1, MCP3008_CHANNELS-1);
 	fprintf(stderr, "  -d = debug level [0-2]; default 0 (none)\n");
+	fprintf(stderr, "  -f = desired clock frequency [%d-%d] kHz\n", minSPS, maxSPS);
 	fprintf(stderr, "  -h = suppress headers\n");
 	fprintf(stderr, "  -l = gpio load spi\n");
-	fprintf(stderr, "  -f = desired clock frequency [%d-%d] kHz\n", minSPS, maxSPS);
+	fprintf(stderr, "  -m = daemon mode");
+	fprintf(stderr, "  -o = output file name\n");
 	fprintf(stderr, "  -s = samples [1-40000]\n");
 	fprintf(stderr, "  -t = trigger voltage [+/-][%.2f-%.2f]; default=1.65\n", triggerMin, triggerMax);
 	fprintf(stderr, "          0 volts--disable triggering\n");
 	fprintf(stderr, "          + volts--trigger when rising\n");
 	fprintf(stderr, "          - volts--trigger when falling\n");
-	fprintf(stderr, "  -o = output file name\n");
 	fprintf(stderr, "  -v = verbose output\n");
 
 	exit(1);
@@ -27,7 +28,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		usage();
 	}
 
-	const char* shortOptions = "c:d:f:hlo:s:t:v";
+	const char* shortOptions = "c:d:f:hlmo:s:t:v";
 
 	static struct option longOptions[] = {
 		{"channel",	required_argument, NULL, 'c'},
@@ -35,6 +36,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		{"freq",	required_argument, NULL, 'f'},
 		{"headers",	optional_argument, NULL, 'h'},
 		{"loadSPI", optional_argument, NULL, 'l'},
+		{"daemon",	optional_argument, NULL, 'm'},
 		{"output",	required_argument, NULL, 'o'},
 		{"samples", required_argument, NULL, 's'},
 		{"trigger", optional_argument, NULL, 't'},
@@ -77,6 +79,10 @@ bool Options::commandLineOptions(int argc, char **argv) {
 
 		case 'l':
 			loadSPIDriver = true;
+			break;
+
+		case 'm':
+			daemon = true;
 			break;
 
 		case 'o':
