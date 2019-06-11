@@ -1,6 +1,6 @@
 <%@include file="header.jsp" %>
 
-<body scroll="no" onLoad="${param.onPageLoad}">
+<body scroll="auto" onLoad="${param.onPageLoad}">
 <div class="webpage">
 
 <%@include file="brandHeading.jsp" %>
