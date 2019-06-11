@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.wryan67.vc.common.Util;
 import org.wryan67.vc.models.OptionsModel;
 import org.wryan67.vc.models.SupportedChartTypes;
+import org.wryan67.vc.org.wryan67.vc.war.VCReader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,8 +21,6 @@ import static org.wryan67.vc.models.OptionsModel.*;
 
 
 public class MonitorController {
-
-
     private static final Logger logger=Logger.getLogger(MonitorController.class);
     private static final String thisPage="monitor.jsp";
 
@@ -32,6 +31,7 @@ public class MonitorController {
         logger.info("monitor action="+action);
 
         if (action==null) {
+            VCReader.kickThread();
             return false;
         }
 
@@ -49,6 +49,7 @@ public class MonitorController {
     }
 
 
+
     private static boolean capture(HttpServletRequest request, HttpServletResponse response) {
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
@@ -61,13 +62,8 @@ public class MonitorController {
         logger.info("capturing data");
         logger.info(options.toString());
 
-        String cmd=String.format("sudo /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o /tmp/data.csv",
-                (options.verbose)?"-v":"",
-                (options.headers)?"":"-h",
-                Util.join(options.channels,","),
-                options.triggerVoltage, options.frequency, options.samples
-        );
 
+        String cmd=buildCommand(options, "/tmp/data.csv");
         logger.info(cmd);
         List<String> messages=new ArrayList<>();
 
@@ -112,6 +108,15 @@ public class MonitorController {
 
 
 
+    }
+
+    public static String buildCommand(OptionsModel options, String interfaceFile) {
+        return String.format("sudo /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o %s",
+                (options.verbose)?"-v":"",
+                (options.headers)?"":"-h",
+                Util.join(options.channels,","),
+                options.triggerVoltage, options.frequency, options.samples, interfaceFile
+        );
     }
 
     private static void blockResponse(HttpServletRequest request, List<String> messages) {
