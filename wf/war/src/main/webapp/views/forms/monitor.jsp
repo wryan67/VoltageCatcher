@@ -92,7 +92,6 @@
 
                 <td>Trigger voltage</td>
                 <td><input name="<%=triggerVoltage%>" type="text" value="<%=options.triggerVoltage%>" ></td>
-                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td>Samples (1-40000)</td>
@@ -101,7 +100,6 @@
 
                 <td>Channels (0-7) csv</td>
                 <td><input name="<%=channels%>" type="text" value="<%=Util.join(options.channels,",")%>" ></td>
-                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td>Headers</td>
@@ -110,7 +108,6 @@
 
                 <td>Output filename</td>
                 <td><input name="<%=outputFilename%>" type="text" value="<%=options.outputFilename%>" ></td>
-                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td>verbose</td>
@@ -128,7 +125,6 @@
                     <% } %>
                 </td>
 
-                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td>Chart type</td>
@@ -145,12 +141,21 @@
                 <td>&nbsp;</td>
             </tr>
             <tr>
-                <td colspan="5">
-                    <div style="text-align:center; margin-top:15px;margin-bottom:15px;">
-                        <button name="buttonAction" onClick="location.href='settings.jsp'" class="button1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
+                <td colspan="2">
+                    <div style="text-align:left; margin-top:15px;margin-bottom:15px;">
+                        <button name="buttonAction" onClick="location.href='monitor.jsp'" class="button1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
                             Capture
                         </button>
                     </div>
+                </td>
+                <td></td>
+                <td colspan="2" style="text-align:left">
+                    <%  if (SessionData.exists(request, SessionData.SessionVar.file2download)) { %>
+                    <div style="text-align:center; margin-top:15px;margin-bottom:15px;background-image: url('${param.baseURL}/assets/images/button1.jpg')"
+                         class="button1" onClick="window.open('download')">
+                            Download
+                    </div>
+                    <% } %>
                 </td>
             </tr>
             <tr>
@@ -158,7 +163,7 @@
                     <div>
                         <%=(userMsg==null)?"":"<br>"+userMsg%>
 
-                        <% if (success) { %>
+                        <% if (success && SessionData.exists(request, SessionData.SessionVar.file2download)) { %>
                           <img src="chart.jpg">
                         <%}%>
                     </div>
@@ -192,15 +197,3 @@
 </script>
 -->
 
-<%  if (SessionData.exists(request, SessionData.SessionVar.file2download)) { %>
-
-    <script>
-        // var xhr = new XMLHttpRequest();
-        // xhr.open("GET", "download");
-        // xhr.send();
-
-        window.location="download";
-    </script>
-
-
-<% } %>
