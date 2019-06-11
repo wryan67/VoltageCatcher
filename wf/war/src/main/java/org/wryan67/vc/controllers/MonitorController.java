@@ -157,7 +157,7 @@ public class MonitorController {
             try {
                 options.triggerVoltage=new Double(getParameter(request,triggerVoltage));
                 if (options.triggerVoltage!=0.0) {
-                    if (options.triggerVoltage < minTriggerVoltage || options.triggerVoltage > maxTriggerVoltage) {
+                    if (Math.abs(options.triggerVoltage) < minTriggerVoltage || Math.abs(options.triggerVoltage) > maxTriggerVoltage) {
                         messages.add("trigger voltage out of valid range");
                     }
                 }
