@@ -18,7 +18,7 @@ public class VCReader implements Runnable {
 
     static Process vc=null;
 
-    public static boolean run=true;
+    public static boolean run=false;
     public static OptionsModel options=new OptionsModel();
 
     public static void killThread() {
@@ -30,20 +30,21 @@ public class VCReader implements Runnable {
     }
 
 
-    public static void kickThread() {
+    public static void kickThread(OptionsModel options) {
         killThread();
+
+        VCReader.options=options;
 
         try {
             Runtime.getRuntime().exec("rm -f /tmp/data.pipe").waitFor();
             Runtime.getRuntime().exec("mknod /tmp/data.pipe p").waitFor();
-            String cmd=MonitorController.buildCommand(options, "/tmp/data.pipe");
+            String cmd=MonitorController.buildCommand(VCReader.options, "/tmp/data.pipe");
 
             vc =  new ProcessBuilder(cmd.concat(" -m").split(" ")).inheritIO().start();
 
 
             new Thread(new VCReader()).start();
 
-            vc.waitFor();
 
         } catch (IOException e) {
             logger.error(e);
@@ -54,13 +55,19 @@ public class VCReader implements Runnable {
 
     @Override
     public void run() {
+        if (run) {
+            logger.error("VCReader requested start, but was already running");
+            return;
+        }
+
         long count=0;
+        run=true;
 
         try (BufferedReader br = Files.newBufferedReader(Paths.get("/tmp/data.pipe"))) {
             String line;
             while ((line = br.readLine()) != null && run) {
                 if ((++count%1000)==0) {
-                    logger.info("vc::"+line);
+                    logger.info("vc(f="+options.frequency+")::"+line);
                 }
             }
             if (!run) {

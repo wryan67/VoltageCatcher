@@ -29,9 +29,10 @@ public class MonitorController {
         String action=request.getParameter("action");
 
         logger.info("monitor action="+action);
+        OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
         if (action==null) {
-            VCReader.kickThread();
+            VCReader.kickThread(options);
             return false;
         }
 
@@ -51,6 +52,7 @@ public class MonitorController {
 
 
     private static boolean capture(HttpServletRequest request, HttpServletResponse response) {
+        VCReader.killThread();
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
         SessionData.setValue(request, status, "failed");
@@ -95,6 +97,7 @@ public class MonitorController {
                 SessionData.setValue(request, status, "success");
             }
 
+            VCReader.kickThread(options);
             return false;
         } catch (IOException e) {
             logger.error("system command failed",e);
