@@ -33,6 +33,7 @@ import java.util.ArrayList;
 public class ChartData extends HttpServlet {
     private static final Logger logger=Logger.getLogger(MonitorController.class);
 
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         OptionsModel options= SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
@@ -46,33 +47,9 @@ public class ChartData extends HttpServlet {
             NumberAxis xAxis = new NumberAxis("microseconds");
             NumberAxis yAxis = new NumberAxis("Volts");
 
-            XYLineAndShapeRenderer renderer=null;
+            XYLineAndShapeRenderer renderer=ChartData.getRenderer(options);
 
 
-            switch (options.chartType) {
-                case spline: {
-                    renderer = new XYSplineRenderer();
-                    renderer.setShapesVisible(false);
-                }   break;
-                case line: {
-                    renderer = new XYLineAndShapeRenderer();
-                    renderer.setShapesVisible(false);
-                }   break;
-                case stepped: {
-                    renderer = new XYStepRenderer();
-                    renderer.setShapesVisible(false);
-                } break;
-                case scatter: {
-//                    Rectangle rectangle = new Rectangle(2,2);
-//                    Shape x = ShapeUtilities.createDiagonalCross(3, 1);
-
-                    Shape marker = new Ellipse2D.Double(1,1,1,1);
-                    renderer = new XYLineAndShapeRenderer();
-                    renderer.setShapesVisible(true);
-                    renderer.setLinesVisible(false);
-                    renderer.setShape(marker);
-                } break;
-            }
 
             XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 
@@ -85,6 +62,37 @@ public class ChartData extends HttpServlet {
         } catch (FileNotFoundException e) {
             logger.error("cannot read /tmp/data.csv",e);
         }
+    }
+
+    public static XYLineAndShapeRenderer getRenderer(OptionsModel options) {
+        XYLineAndShapeRenderer renderer=null;
+
+        switch (options.chartType) {
+            case spline: {
+                renderer = new XYSplineRenderer();
+                renderer.setShapesVisible(false);
+            }   break;
+            case line: {
+                renderer = new XYLineAndShapeRenderer();
+                renderer.setShapesVisible(false);
+            }   break;
+            case stepped: {
+                renderer = new XYStepRenderer();
+                renderer.setShapesVisible(false);
+            } break;
+            case scatter: {
+//                    Rectangle rectangle = new Rectangle(2,2);
+//                    Shape x = ShapeUtilities.createDiagonalCross(3, 1);
+
+                Shape marker = new Ellipse2D.Double(1,1,1,1);
+                renderer = new XYLineAndShapeRenderer();
+                renderer.setShapesVisible(true);
+                renderer.setLinesVisible(false);
+                renderer.setShape(marker);
+            } break;
+        }
+
+        return renderer;
     }
 
     private XYDataset loadData(OptionsModel options) throws IOException {
@@ -138,7 +146,6 @@ public class ChartData extends HttpServlet {
             XYSeries lineplot = new XYSeries(label);
             series.add(lineplot);
             dataset.addSeries(lineplot);
-
         }
 
         do {

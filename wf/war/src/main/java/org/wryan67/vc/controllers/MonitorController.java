@@ -28,6 +28,9 @@ public class MonitorController {
     public static boolean process(HttpServletRequest request, HttpServletResponse response) throws SkipPageException {
         String action=request.getParameter("action");
 
+        MonitorController.killvc();
+
+
         logger.info("monitor action="+action);
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
@@ -243,5 +246,19 @@ public class MonitorController {
         } else {
             return true;
         }
+    }
+
+    public static void killvc() {
+
+
+        try {
+            Process p = Runtime.getRuntime().exec("sudo /usr/local/bin/killvc");
+            p.waitFor();
+        } catch (IOException e) {
+
+        } catch (InterruptedException e) {
+
+        }
+
     }
 }

@@ -11,6 +11,7 @@
 <%@ page import="org.wryan67.vc.models.VCOutputFormat" %>
 <%@ page import="static java.lang.Boolean.FALSE" %>
 <%@ page import="org.wryan67.vc.models.SupportedChartTypes" %>
+<%@ page import="org.wryan67.vc.controllers.MonitorController" %>
 
 <%
     SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
@@ -18,6 +19,9 @@
     String userMsg = SessionData.getValueAndRemove(request, userMessage);
 
     OptionsModel options = SessionData.getValueOrDefault(request, userOptions, new OptionsModel());
+
+    int imageTimeout=150+(options.channels.size()*150);
+
 
 
     String mc1sel="";
@@ -81,6 +85,7 @@
 <!--
     <canvas id="mycanvas" width="1000" height="100"></canvas>
 -->
+    <img id="rtImage" src="x" width="1125" height="300">
 
     <form method=post>
         <input type=hidden name=action value="capture">
@@ -197,3 +202,23 @@
 </script>
 -->
 
+<script>
+
+    function rtImageUpdate() {
+        var imgReplace = document.getElementById("rtImage");
+            imgReplace.style.visibility = "false";
+            imgReplace.src = "rtchart.jpg?ts="+Date.now();
+            imgReplace.style.visibility = "visible";
+    }
+    function rtImageUpdate2() {
+        rtImageUpdate()
+        setTimeout(rtImageUpdate2, <%=imageTimeout%>);
+    }
+
+    function rtImageUpdate1() {
+        rtImageUpdate()
+        setTimeout(rtImageUpdate2, 2000);
+    }
+
+    setTimeout(rtImageUpdate1, 1000);
+</script>

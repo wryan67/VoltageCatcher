@@ -1,7 +1,8 @@
 package org.wryan67.vc.org.wryan67.vc.war;
 
 import org.apache.log4j.Logger;
-import org.wryan67.vc.basetypes.VCData;
+import org.jfree.data.xy.XYDataItem;
+import org.jfree.data.xy.XYSeries;
 import org.wryan67.vc.controllers.MonitorController;
 import org.wryan67.vc.models.OptionsModel;
 
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 public class VCReader implements Runnable {
     private static final Logger logger=Logger.getLogger(MonitorController.class);
 
-    static ArrayList<VCData> data=new ArrayList<>(40000);
+    private static ArrayList<XYSeries> data=new ArrayList<>();
 
     static Process vc=null;
 
@@ -29,6 +30,11 @@ public class VCReader implements Runnable {
         }
     }
 
+    public static ArrayList<XYSeries> getData() {
+        synchronized (data) {
+            return data;
+        }
+    }
 
     public static void kickThread(OptionsModel options) {
         killThread();
@@ -63,13 +69,28 @@ public class VCReader implements Runnable {
         long count=0;
         run=true;
 
+        int channels=options.channels.size();
+
+        ArrayList<XYSeries> series = new ArrayList<XYSeries>(channels);
+
+        initSeries(series, channels);
+
+
         try (BufferedReader br = Files.newBufferedReader(Paths.get("/tmp/data.pipe"))) {
             String line;
             while ((line = br.readLine()) != null && run) {
-                if ((++count%1000)==0) {
-                    logger.info("vc(f="+options.frequency+")::"+line);
+                if (++count%options.samples==0) {
+                    saveChartData(series);
+                    initSeries(series, channels);
+                    count=0;
                 }
-            }
+
+                String parts[] = line.split(",");
+                Double x=new Double(parts[1]);
+                for (int i=0;i<channels;++i) {
+                    series.get(i).add(x, new Double(parts[i+2]));
+                }
+          }
             if (!run) {
                 logger.info("Run terminated");
             }
@@ -78,12 +99,37 @@ public class VCReader implements Runnable {
             }
 
         } catch (IOException e) {
-            System.err.format("IOException: %s%n", e);
+            System.err.format("named pipe IOException: %s%n", e);
         }
-
-
-
         killThread();
-
     }
+
+    private void saveChartData(ArrayList<XYSeries> series) {
+        synchronized (data) {
+            int items=series.get(0).getItemCount();
+            XYDataItem firstItem = (XYDataItem) series.get(0).getItems().get(0);
+            XYDataItem lastItem  = (XYDataItem) series.get(0).getItems().get(items-1);
+
+            long elapsed=lastItem.getX().longValue()-firstItem.getX().longValue();
+
+            logger.info(String.format("elapsed = %dms  sps=%6.0f", elapsed/1000, 1000000.0 * items / elapsed));
+
+            data.clear();
+            for (int c = 0; c < series.size(); ++c) {
+                data.add(series.get(c));
+            }
+        }
+    }
+
+    private void initSeries(ArrayList<XYSeries> series, int channels) {
+        series.clear();
+        for (int c=0; c < channels; ++c) {
+            String label="channel-" + options.channels.get(c);
+            XYSeries lineplot = new XYSeries(label);
+            series.add(lineplot);
+        }
+    }
+
+
+
 }
