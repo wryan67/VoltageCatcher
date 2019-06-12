@@ -117,7 +117,7 @@ public class MonitorController {
     }
 
     public static String buildCommand(OptionsModel options, String interfaceFile) {
-        return String.format("sudo /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o %s",
+        return String.format("sudo ionice -c1 -n0 nice -n -20 /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o %s",
                 (options.verbose)?"-v":"",
                 (options.headers)?"":"-h",
                 Util.join(options.channels,","),
