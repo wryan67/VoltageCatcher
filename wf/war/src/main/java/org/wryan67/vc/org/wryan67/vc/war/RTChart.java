@@ -43,21 +43,27 @@ public class RTChart extends HttpServlet {
 
             XYPlot plot = new XYPlot(dataset, xAxis, yAxis, ChartData.getRenderer(options));
 
-            Number min=0;
-            Number max=150000;
+            Number min = 0;
+            Number max = 150000;
 
             min = dataset.getX(0, 0);
-            max = dataset.getX(0, dataset.getItemCount(0)-1);
+            max = dataset.getX(0, dataset.getItemCount(0) - 1);
 
-            plot.getDomainAxis().setRange(min.longValue(),max.longValue());
-           // plot.setBackgroundPaint(new Color(238,238,238));
+            plot.getDomainAxis().setRange(min.longValue(), max.longValue());
+            // plot.setBackgroundPaint(new Color(238,238,238));
 
             JFreeChart chart = new JFreeChart("Voltage Catcher", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
 
-            ChartUtilities.writeChartAsJPEG(response.getOutputStream(),chart, 1125,300);
+            ChartUtilities.writeChartAsJPEG(response.getOutputStream(), chart, 1125, 300);
 
         } catch (FileNotFoundException e) {
-            logger.error("cannot read /tmp/data.csv",e);
+            logger.error("cannot read /tmp/data.csv", e);
+        } catch (IOException e) {
+            logger.error("rt chart generator: IOException: "+e.getMessage());
+        } catch (IndexOutOfBoundsException e) {
+            // no data available
+        } catch (Exception e) {
+            logger.error("rt chart generator failed",e);
         }
     }
 
