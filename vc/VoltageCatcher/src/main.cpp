@@ -416,10 +416,17 @@ void pwmDutyCycle(int pwmOutputPin, int speed) {
 
 int main(int argc, char **argv)
 {
-	setuid(0);
+	if (setuid(0) != 0) {
+		fprintf(stderr, "please use sudo to execute this command\n");
+		exit(2);
+	}
+
+	char cmd[128];
+	sprintf(cmd, "ps -ef | awk '{if (/usr.local.bin.vc / && !/awk/ && $2!='%d') system(sprintf(\"kill -9 %%d\",$2))}'", getpid());
+	system(cmd);
 
 	if (!options.commandLineOptions(argc, argv)) {
-		return 1;
+		exit(1);
 	}
 
 	options.sampleFile = fopen(options.sampleFileName, "w");
@@ -430,7 +437,7 @@ int main(int argc, char **argv)
 
 	if (!setup()) {
 		printf("setup failed\n");
-		return 1;
+		exit(2);
 	}
 
 	printf("setup event triggers\n");
