@@ -35,7 +35,7 @@ public class MonitorController {
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
         if (action==null) {
-            VCReader.kickThread(options);
+            VCReader.startMonitor(options);
             return false;
         }
 
@@ -55,7 +55,7 @@ public class MonitorController {
 
 
     private static boolean capture(HttpServletRequest request, HttpServletResponse response) {
-        VCReader.killThread();
+        VCReader.stopMonitor();
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
         SessionData.setValue(request, status, "failed");
@@ -100,7 +100,7 @@ public class MonitorController {
                 SessionData.setValue(request, status, "success");
             }
 
-            VCReader.kickThread(options);
+            VCReader.startMonitor(options);
             return false;
         } catch (IOException e) {
             logger.error("system command failed",e);
@@ -117,7 +117,10 @@ public class MonitorController {
     }
 
     public static String buildCommand(OptionsModel options, String interfaceFile) {
-        return String.format("sudo ionice -c1 -n0 nice -n -20 /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o %s",
+        String sudo=(Util.whoami().equals("root"))?"":"sudo";
+
+        return String.format("%s ionice -c1 -n0 nice -n -20 /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o %s",
+                sudo,
                 (options.verbose)?"-v":"",
                 (options.headers)?"":"-h",
                 Util.join(options.channels,","),
@@ -252,7 +255,7 @@ public class MonitorController {
 
 
         try {
-            Process p = Runtime.getRuntime().exec("sudo /usr/local/bin/killvc");
+            Process p = Runtime.getRuntime().exec("/usr/local/bin/killvc");
             p.waitFor();
         } catch (IOException e) {
 

@@ -153,14 +153,20 @@
                         </button>
                     </div>
                 </td>
-                <td></td>
-                <td colspan="2" style="text-align:left">
+                <td style="text-align:left">
                     <%  if (SessionData.exists(request, SessionData.SessionVar.file2download)) { %>
                     <div style="text-align:center; margin-top:15px;margin-bottom:15px;background-image: url('${param.baseURL}/assets/images/button1.jpg')"
                          class="button1" onClick="window.open('download')">
                             Download
                     </div>
                     <% } %>
+                </td>
+                <td colspan=2 style="text-align:right">
+                    <div style="text-align:center; margin-top:15px;margin-bottom:15px;background-image: url('${param.baseURL}/assets/images/button1.jpg')"
+                         class="button1" onClick="xhrStop()">
+                        Stop
+                    </div>
+
                 </td>
             </tr>
             <tr>
@@ -221,4 +227,13 @@
     }
 
     setTimeout(rtImageUpdate1, 1000);
+</script>
+
+
+<script>
+    function xhrStop() {
+        var oReq = new XMLHttpRequest();
+        oReq.open("GET", "stop");
+        oReq.send();
+    }
 </script>

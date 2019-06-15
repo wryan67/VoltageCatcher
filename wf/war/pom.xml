@@ -87,6 +87,13 @@
         </dependency>
 
 
+        <!-- https://mvnrepository.com/artifact/com.pi4j/pi4j-core -->
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-core</artifactId>
+        </dependency>
+
+
         <!-- project dependencies -->
         <dependency>
             <groupId>org.wryan67.vc</groupId>

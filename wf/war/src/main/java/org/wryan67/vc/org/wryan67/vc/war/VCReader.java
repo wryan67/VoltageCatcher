@@ -22,7 +22,7 @@ public class VCReader implements Runnable {
     public static boolean run=false;
     public static OptionsModel options=new OptionsModel();
 
-    public static void killThread() {
+    public static void stopMonitor() {
         if (vc != null) {
             VCReader.run = false;
             vc.destroyForcibly();
@@ -36,8 +36,8 @@ public class VCReader implements Runnable {
         }
     }
 
-    public static void kickThread(OptionsModel options) {
-        killThread();
+    public static void startMonitor(OptionsModel options) {
+        stopMonitor();
 
         VCReader.options=options;
 
@@ -101,7 +101,7 @@ public class VCReader implements Runnable {
         } catch (IOException e) {
             System.err.format("named pipe IOException: %s%n", e);
         }
-        killThread();
+        stopMonitor();
     }
 
     private void saveChartData(ArrayList<XYSeries> series) {
