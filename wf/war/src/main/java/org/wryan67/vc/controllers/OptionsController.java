@@ -39,10 +39,13 @@ public class OptionsController {
         if (cookieJar.containsKey(browserId.name())) {
             OPTIONS options=fetch.row("OPTIONS.getByUID","UID",cookieJar.getCookieValue(browserId.name()),logger);
             if (options!=null) {
-                logger.info("got options from cookie");
 
                 try {
-                    return new OptionsModel().fromJson(options.getOPTIONS());
+                    OptionsModel optionModel = new OptionsModel().fromJson(options.getOPTIONS());
+
+                    logger.info("got options from cookie, freq="+optionModel.frequency);
+                    SessionData.setValue(request,userOptions,optionModel);
+                    return optionModel;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
