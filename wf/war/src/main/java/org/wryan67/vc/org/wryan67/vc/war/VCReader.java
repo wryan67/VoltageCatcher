@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class VCReader implements Runnable {
-    private static final Logger logger=Logger.getLogger(MonitorController.class);
+    private static final Logger logger=Logger.getLogger(VCReader.class);
 
     private static ArrayList<XYSeries> data=new ArrayList<>();
 

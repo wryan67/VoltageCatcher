@@ -1,7 +1,6 @@
 <%@ page import="org.wryan67.vc.common.AppConstants" %>
 <%@ page import="org.wryan67.vc.common.Util" %>
 <%@ page import="org.wryan67.vc.common.jmx.JMX" %>
-
 <%@ page import="org.wryan67.vc.controllers.SessionData" %>
 <%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.*" %>
 <%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
@@ -12,13 +11,13 @@
 <%@ page import="static java.lang.Boolean.FALSE" %>
 <%@ page import="org.wryan67.vc.models.SupportedChartTypes" %>
 <%@ page import="org.wryan67.vc.controllers.MonitorController" %>
-
+<%@ page import="org.wryan67.vc.controllers.OptionsController" %>
 <%
     SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
 
     String userMsg = SessionData.getValueAndRemove(request, userMessage);
+    OptionsModel options = OptionsController.getOptions(request,response);
 
-    OptionsModel options = SessionData.getValueOrDefault(request, userOptions, new OptionsModel());
 
     int imageTimeout=150+(options.channels.size()*150);
 
