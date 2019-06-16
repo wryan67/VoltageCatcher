@@ -46,7 +46,7 @@ public class MonitorController {
         
         switch (action) {
             case "capture": {
-                return capture(request, response);
+                return capture(request, response, options);
             }
 
             default:
@@ -58,9 +58,12 @@ public class MonitorController {
 
 
 
-    private static boolean capture(HttpServletRequest request, HttpServletResponse response) {
+    private static boolean capture(HttpServletRequest request, HttpServletResponse response, OptionsModel options) {
         VCReader.stopMonitor();
-        OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
+
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {}
 
         SessionData.setValue(request, status, "failed");
 
@@ -88,9 +91,14 @@ public class MonitorController {
 
             Process p = Runtime.getRuntime().exec(cmd);
 
+            try {
+                p.waitFor();
+            } catch (InterruptedException e) {}
+
 
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
 
             String s;
             while ((s = stdInput.readLine()) != null) {
@@ -101,9 +109,6 @@ public class MonitorController {
                 messages.add(s);
             }
 
-            try {
-                p.waitFor();
-            } catch (InterruptedException e) {}
 
             SessionData.setValue(request, SessionData.SessionVar.file2download,"/tmp/data.csv");
             blockResponse(request,messages);
@@ -121,12 +126,9 @@ public class MonitorController {
 
             return false;
         }
-
-
-
-
-
     }
+
+
 
     public static String buildCommand(OptionsModel options, String interfaceFile) {
         String sudo=(Util.whoami().equals("root"))?"":"sudo";
