@@ -1,7 +1,11 @@
 package org.wryan67.vc.controllers;
 
 import org.apache.log4j.Logger;
+import org.wryan67.vc.common.CookieJar;
 import org.wryan67.vc.common.Util;
+import org.wryan67.vc.database.tables.OPTIONS;
+import org.wryan67.vc.database.util.dbCaller;
+import org.wryan67.vc.database.util.hibernate;
 import org.wryan67.vc.models.OptionsModel;
 import org.wryan67.vc.models.SupportedChartTypes;
 import org.wryan67.vc.org.wryan67.vc.war.VCReader;
@@ -62,6 +66,14 @@ public class MonitorController {
 
         if (!validateInput(request,options)) {
             return false;
+        }
+
+        CookieJar cookieJar = new CookieJar(request,logger);
+        if (cookieJar.containsKey(browserId.name())) {
+            OPTIONS row = new OPTIONS();
+            row.setUID(cookieJar.getCookieValue(browserId.name()));
+            row.setOPTIONS(options.toJson(true));
+            hibernate.updateHibernateObject(row, dbCaller.emf,logger);
         }
 
         logger.info("capturing data");
