@@ -27,10 +27,9 @@ public class SessionData {
         if (attribute==null) {
             return false;
         } else {
-            return Util.isBlankOrNull(attribute.toString());
+            return !Util.isBlankOrNull(attribute.toString());
         }
     }
-
 
 
 

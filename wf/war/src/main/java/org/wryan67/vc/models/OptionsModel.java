@@ -1,11 +1,11 @@
 package org.wryan67.vc.models;
 
-import org.wryan67.vc.common.Util;
+import org.wryan67.vc.common.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OptionsModel {
+public class OptionsModel extends JsonObject {
 
     public enum OptionFields {
         samples,
@@ -47,8 +47,4 @@ public class OptionsModel {
     public String               clockOutPin     = "1";
 
 
-    @Override
-    public String toString() {
-        return Util.toJSON(this,this.getClass().getSimpleName());
-    }
 }

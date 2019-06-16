@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.log4j.Logger;
+import org.wryan67.vc.common.json.JsonConverter;
 
 import java.awt.event.KeyEvent;
 import java.io.*;

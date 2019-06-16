@@ -112,7 +112,7 @@ public class VCReader implements Runnable {
 
             long elapsed=lastItem.getX().longValue()-firstItem.getX().longValue();
 
-            logger.info(String.format("elapsed = %dms  sps=%6.0f", elapsed/1000, 1000000.0 * items / elapsed));
+//            logger.info(String.format("elapsed = %dms  sps=%6.0f", elapsed/1000, 1000000.0 * items / elapsed));
 
             data.clear();
             for (int c = 0; c < series.size(); ++c) {

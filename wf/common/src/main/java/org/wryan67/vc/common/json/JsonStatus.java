@@ -1,4 +1,4 @@
-package org.wryan67.vc.common;
+package org.wryan67.vc.common.json;
 
 public class JsonStatus {
     private int 	status;

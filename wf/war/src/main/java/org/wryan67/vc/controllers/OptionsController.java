@@ -12,6 +12,7 @@ import org.wryan67.vc.models.OptionsModel;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 import static org.wryan67.vc.controllers.SessionData.SessionVar.browserId;
 import static org.wryan67.vc.controllers.SessionData.SessionVar.userOptions;
@@ -23,43 +24,49 @@ public class OptionsController {
 
     public static OptionsModel getOptions(HttpServletRequest request, HttpServletResponse response) {
 
+        CookieJar cookieJar=new CookieJar(request,logger);
+
+
         if (SessionData.exists(request, userOptions)) {
+            OptionsModel optionsModel=SessionData.getValue(request, userOptions);
             logger.info("got options from session");
-            return SessionData.getValue(request, userOptions);
+
+            return optionsModel;
         }
 
-        CookieJar cookieJar=new CookieJar(request,logger);
 
 
         if (cookieJar.containsKey(browserId.name())) {
             OPTIONS options=fetch.row("OPTIONS.getByUID","UID",cookieJar.getCookieValue(browserId.name()),logger);
-            if (fetch!=null) {
+            if (options!=null) {
                 logger.info("got options from cookie");
 
-                logger.info(options);
-                logger.info("todo json to object");
-                return new OptionsModel();
+                try {
+                    return new OptionsModel().fromJson(options.getOPTIONS());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        } else {
+            logger.info("cookie jar is empty");
         }
 
-
-        return createNewOptions(request,response);
-
+        return setCookie(request,response,new OptionsModel());
     }
 
 
 
-    private static OptionsModel createNewOptions(HttpServletRequest request, HttpServletResponse response) {
+    private static OptionsModel setCookie(HttpServletRequest request, HttpServletResponse response, OptionsModel optionsModel) {
         logger.info("creating new cookie");
 
-        OptionsModel optionsModel=new OptionsModel();
         OPTIONS options=new OPTIONS();
 
         String id=Util.getGUID();
         options.setUID(id);
-        options.setOPTIONS(optionsModel.toString());
+        options.setOPTIONS(optionsModel.toJson(true));
 
         hibernate.insert(options,dbCaller.emf,logger);
+        SessionData.setValue(request,userOptions,optionsModel);
 
         Cookie cookie = new Cookie(browserId.name(), id);
         cookie.setHttpOnly(false);
@@ -68,7 +75,6 @@ public class OptionsController {
         logger.info("cookie "+browserId.name()+" domain="+cookie.getDomain());
         response.addCookie(cookie);
 
-        SessionData.setValue(request,userOptions,optionsModel);
         return optionsModel;
 
     }
