@@ -62,7 +62,7 @@ public class MonitorController {
         VCReader.stopMonitor();
 
         try {
-            Thread.sleep(500);
+            Thread.sleep(100);
         } catch (Exception e) {}
 
         SessionData.setValue(request, status, "failed");
