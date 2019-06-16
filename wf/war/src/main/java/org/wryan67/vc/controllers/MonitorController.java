@@ -1,7 +1,11 @@
 package org.wryan67.vc.controllers;
 
 import org.apache.log4j.Logger;
+import org.wryan67.vc.common.CookieJar;
 import org.wryan67.vc.common.Util;
+import org.wryan67.vc.database.tables.OPTIONS;
+import org.wryan67.vc.database.util.dbCaller;
+import org.wryan67.vc.database.util.hibernate;
 import org.wryan67.vc.models.OptionsModel;
 import org.wryan67.vc.models.SupportedChartTypes;
 import org.wryan67.vc.org.wryan67.vc.war.VCReader;
@@ -35,14 +39,14 @@ public class MonitorController {
         OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
 
         if (action==null) {
-            VCReader.kickThread(options);
+            VCReader.startMonitor(options);
             return false;
         }
 
         
         switch (action) {
             case "capture": {
-                return capture(request, response);
+                return capture(request, response, options);
             }
 
             default:
@@ -54,14 +58,25 @@ public class MonitorController {
 
 
 
-    private static boolean capture(HttpServletRequest request, HttpServletResponse response) {
-        VCReader.killThread();
-        OptionsModel options=SessionData.getValueOrDefault(request,SessionData.SessionVar.userOptions,new OptionsModel());
+    private static boolean capture(HttpServletRequest request, HttpServletResponse response, OptionsModel options) {
+        VCReader.stopMonitor();
+
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {}
 
         SessionData.setValue(request, status, "failed");
 
         if (!validateInput(request,options)) {
             return false;
+        }
+
+        CookieJar cookieJar = new CookieJar(request,logger);
+        if (cookieJar.containsKey(browserId.name())) {
+            OPTIONS row = new OPTIONS();
+            row.setUID(cookieJar.getCookieValue(browserId.name()));
+            row.setOPTIONS(options.toJson(true));
+            hibernate.updateHibernateObject(row, dbCaller.emf,logger);
         }
 
         logger.info("capturing data");
@@ -76,9 +91,14 @@ public class MonitorController {
 
             Process p = Runtime.getRuntime().exec(cmd);
 
+            try {
+                p.waitFor();
+            } catch (InterruptedException e) {}
+
 
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
 
             String s;
             while ((s = stdInput.readLine()) != null) {
@@ -89,9 +109,6 @@ public class MonitorController {
                 messages.add(s);
             }
 
-            try {
-                p.waitFor();
-            } catch (InterruptedException e) {}
 
             SessionData.setValue(request, SessionData.SessionVar.file2download,"/tmp/data.csv");
             blockResponse(request,messages);
@@ -100,7 +117,7 @@ public class MonitorController {
                 SessionData.setValue(request, status, "success");
             }
 
-            VCReader.kickThread(options);
+            VCReader.startMonitor(options);
             return false;
         } catch (IOException e) {
             logger.error("system command failed",e);
@@ -109,15 +126,15 @@ public class MonitorController {
 
             return false;
         }
-
-
-
-
-
     }
 
+
+
     public static String buildCommand(OptionsModel options, String interfaceFile) {
-        return String.format("sudo ionice -c1 -n0 nice -n -20 /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o %s",
+        String sudo=(Util.whoami().equals("root"))?"":"sudo";
+
+        return String.format("%s ionice -c1 -n0 nice -n -20 /usr/local/bin/vc %s %s -c %s -t %f -f %d -s %d -o %s",
+                sudo,
                 (options.verbose)?"-v":"",
                 (options.headers)?"":"-h",
                 Util.join(options.channels,","),
@@ -252,7 +269,7 @@ public class MonitorController {
 
 
         try {
-            Process p = Runtime.getRuntime().exec("sudo /usr/local/bin/killvc");
+            Process p = Runtime.getRuntime().exec("/usr/local/bin/killvc");
             p.waitFor();
         } catch (IOException e) {
 

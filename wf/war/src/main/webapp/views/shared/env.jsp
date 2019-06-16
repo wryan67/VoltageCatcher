@@ -19,6 +19,7 @@
    }
    String baseURL= AppConstants.rootContext;
 
+
 //   if (RACCEntryPoint.isHttps(request)) {
 //       baseURL = "https://" + request.getServerName();
 //       if (request.getServerPort()!=443 && request.getServerPort()!=80) {

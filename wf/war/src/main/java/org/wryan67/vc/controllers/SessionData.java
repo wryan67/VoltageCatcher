@@ -1,5 +1,7 @@
 package org.wryan67.vc.controllers;
 
+import org.wryan67.vc.common.Util;
+
 import javax.servlet.http.HttpServletRequest;
 
 
@@ -10,7 +12,9 @@ public class SessionData {
         userMessage,
         file2download,
         status,
-        userOptions;
+        userOptions,
+        browserId
+        ;
     }
 
 
@@ -19,9 +23,13 @@ public class SessionData {
     }
 
     public static boolean exists(HttpServletRequest request, SessionVar name) {
-        return (request.getSession().getAttribute(name.toString())==null)?false:true;
+        Object attribute=request.getSession().getAttribute(name.toString());
+        if (attribute==null) {
+            return false;
+        } else {
+            return !Util.isBlankOrNull(attribute.toString());
+        }
     }
-
 
 
 

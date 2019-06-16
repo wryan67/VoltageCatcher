@@ -1,7 +1,6 @@
 <%@ page import="org.wryan67.vc.common.AppConstants" %>
 <%@ page import="org.wryan67.vc.common.Util" %>
 <%@ page import="org.wryan67.vc.common.jmx.JMX" %>
-
 <%@ page import="org.wryan67.vc.controllers.SessionData" %>
 <%@ page import="static org.wryan67.vc.models.OptionsModel.OptionFields.*" %>
 <%@ page import="org.wryan67.vc.mbeans.SettingsMBean" %>
@@ -12,13 +11,13 @@
 <%@ page import="static java.lang.Boolean.FALSE" %>
 <%@ page import="org.wryan67.vc.models.SupportedChartTypes" %>
 <%@ page import="org.wryan67.vc.controllers.MonitorController" %>
-
+<%@ page import="org.wryan67.vc.controllers.OptionsController" %>
 <%
     SettingsMBean settings = (SettingsMBean) JMX.getMBean("org.wryan67.vc.mbeans:service=Settings", SettingsMBean.class);
 
     String userMsg = SessionData.getValueAndRemove(request, userMessage);
+    OptionsModel options = OptionsController.getOptions(request,response);
 
-    OptionsModel options = SessionData.getValueOrDefault(request, userOptions, new OptionsModel());
 
     int imageTimeout=150+(options.channels.size()*150);
 
@@ -153,14 +152,20 @@
                         </button>
                     </div>
                 </td>
-                <td></td>
-                <td colspan="2" style="text-align:left">
+                <td style="text-align:left">
                     <%  if (SessionData.exists(request, SessionData.SessionVar.file2download)) { %>
                     <div style="text-align:center; margin-top:15px;margin-bottom:15px;background-image: url('${param.baseURL}/assets/images/button1.jpg')"
                          class="button1" onClick="window.open('download')">
                             Download
                     </div>
                     <% } %>
+                </td>
+                <td colspan=2 style="text-align:right">
+                    <div style="text-align:center; margin-top:15px;margin-bottom:15px;background-image: url('${param.baseURL}/assets/images/button1.jpg')"
+                         class="button1" onClick="xhrStop()">
+                        Stop
+                    </div>
+
                 </td>
             </tr>
             <tr>
@@ -221,4 +226,13 @@
     }
 
     setTimeout(rtImageUpdate1, 1000);
+</script>
+
+
+<script>
+    function xhrStop() {
+        var oReq = new XMLHttpRequest();
+        oReq.open("GET", "stop");
+        oReq.send();
+    }
 </script>

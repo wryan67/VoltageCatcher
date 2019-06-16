@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.log4j.Logger;
+import org.wryan67.vc.common.json.JsonConverter;
 
 import java.awt.event.KeyEvent;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -649,4 +648,16 @@ public class Util {
         return sum;
     }
 
+    public static String whoami() {
+        try {
+            String command = "whoami";
+            Process p = Runtime.getRuntime().exec(command);
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+            return stdInput.readLine();
+        } catch (IOException e) {
+            return null;
+        }
+    }
 }

@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class VCReader implements Runnable {
-    private static final Logger logger=Logger.getLogger(MonitorController.class);
+    private static final Logger logger=Logger.getLogger(VCReader.class);
 
     private static ArrayList<XYSeries> data=new ArrayList<>();
 
@@ -22,7 +22,7 @@ public class VCReader implements Runnable {
     public static boolean run=false;
     public static OptionsModel options=new OptionsModel();
 
-    public static void killThread() {
+    public static void stopMonitor() {
         if (vc != null) {
             VCReader.run = false;
             vc.destroyForcibly();
@@ -36,8 +36,8 @@ public class VCReader implements Runnable {
         }
     }
 
-    public static void kickThread(OptionsModel options) {
-        killThread();
+    public static void startMonitor(OptionsModel options) {
+        stopMonitor();
 
         VCReader.options=options;
 
@@ -101,7 +101,7 @@ public class VCReader implements Runnable {
         } catch (IOException e) {
             System.err.format("named pipe IOException: %s%n", e);
         }
-        killThread();
+        stopMonitor();
     }
 
     private void saveChartData(ArrayList<XYSeries> series) {
@@ -112,7 +112,7 @@ public class VCReader implements Runnable {
 
             long elapsed=lastItem.getX().longValue()-firstItem.getX().longValue();
 
-            logger.info(String.format("elapsed = %dms  sps=%6.0f", elapsed/1000, 1000000.0 * items / elapsed));
+//            logger.info(String.format("elapsed = %dms  sps=%6.0f", elapsed/1000, 1000000.0 * items / elapsed));
 
             data.clear();
             for (int c = 0; c < series.size(); ++c) {
