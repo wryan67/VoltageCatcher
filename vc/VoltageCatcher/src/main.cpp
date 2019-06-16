@@ -420,9 +420,12 @@ int main(int argc, char **argv)
 		fprintf(stderr, "please use sudo to execute this command\n");
 		exit(2);
 	}
-
 	char cmd[128];
-	sprintf(cmd, "ps -ef | awk '{if (/usr.local.bin.vc / && !/awk/ && $2!='%d') system(sprintf(\"kill -9 %%d\",$2))}'", getpid());
+
+
+//	sprintf(cmd,"/home/wryan/bin/vc.pids.sh %d %d\n", getpid(), getppid());
+//	system(cmd);
+	sprintf(cmd, "ps -ef | awk '{if (/usr.local.bin.vc / && !/awk/ && $2!=%d && $2!=%d) system(sprintf(\"kill -9 %%d\",$2))}'", getpid(),getppid());
 	system(cmd);
 
 	if (!options.commandLineOptions(argc, argv)) {
