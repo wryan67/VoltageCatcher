@@ -11,6 +11,9 @@
         <button name="buttonAction" onClick="location.href='settings.jsp'" class="menuButton1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
             Settings
         </button>
+        <button name="buttonAction" onClick="location.href='wiring.jsp'" class="menuButton1" style="background-image: url('${param.baseURL}/assets/images/button1.jpg')" >
+            Wiring
+        </button>
     </span>
     </div>
 </div>
