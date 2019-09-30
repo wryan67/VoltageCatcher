@@ -333,6 +333,7 @@ bool checkTrigger(float volts) {
 			}
 		}
 	}
+    return false;
 }
 
 void breakOut(int out) {
