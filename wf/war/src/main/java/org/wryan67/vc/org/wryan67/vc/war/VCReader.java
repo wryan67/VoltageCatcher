@@ -82,7 +82,7 @@ public class VCReader implements Runnable {
 
         initSeries(series, channels);
 
-        boolean firstLine=true;
+        boolean firstVoltage=true;
 
 
         try (BufferedReader br = Files.newBufferedReader(Paths.get("/tmp/data.pipe"))) {
@@ -92,15 +92,13 @@ public class VCReader implements Runnable {
                 String parts[] = line.split(",");
                 Float currVoltage=new Float((parts[0+2]));
 
-                if (firstLine) {
+                if (firstVoltage) {
                     resetTrigger(currVoltage);
-                    firstLine=false;
+                    firstVoltage=false;
                 }
 
                 if (!checkTrigger(currVoltage)) {
                     continue;
-                } else {
-//                    logger.info("triggerMet: volts="+currVoltage);
                 }
 
                 if (++count%options.samples==0) {
@@ -108,6 +106,7 @@ public class VCReader implements Runnable {
                     initSeries(series, channels);
                     count=0;
                     resetTrigger(currVoltage);
+                    continue;
                 }
 
                 Float x=new Float(parts[1]);
@@ -169,7 +168,6 @@ public class VCReader implements Runnable {
                 return false;
             } else {
                 if (volts >= options.triggerVoltage) {
-                    logger.info("triggerMet: volts="+volts);
                     triggerMet = true;
                     return true;
                 }
@@ -194,7 +192,6 @@ public class VCReader implements Runnable {
                 return false;
             } else {
                 if (volts <= options.triggerVoltage) {
-                    logger.info("triggerMet: volts="+volts);
                     triggerMet = true;
                     return true;
                 }
