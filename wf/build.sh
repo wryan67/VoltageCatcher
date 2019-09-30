@@ -15,7 +15,7 @@ EAR=$PROJECT.ear
 
 
 if [ "$ENV" = "dev" -o "$ENV" = "dev1" ];then
-   SERVER=pi
+   SERVER=mypi
    TARGET=/home/wryan/jvm1/standalone/deployments
    PROJECTS=""
    PROFILES=""

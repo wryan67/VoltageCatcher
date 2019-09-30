@@ -1,4 +1,4 @@
-package org.wryan67.vc.common;
+package org.wryan67.vc.controllers;
 
 class ReportController {
     

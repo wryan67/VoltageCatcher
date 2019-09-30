@@ -31,20 +31,30 @@ public class OptionsModel extends JsonObject {
     public static final int minChannels = 1;
     public static final int maxChannels = 8;
 
-    public static final double minTriggerVoltage = 0.5;
-    public static final double maxTriggerVoltage = 3.4;
+    public static final float minTriggerVoltage = (float) 0.5;
+    public static final float maxTriggerVoltage = (float) 3.4;
+
 
     @InputStyle(width=60)
     public Integer              samples         = 2048;
     public Integer              frequency       = 10;
     public List<Integer>        channels        = new ArrayList<Integer>(){{add(0);add(2);}};
-    public Double               triggerVoltage  = 1.65;
+    public Float                triggerVoltage  = (float) 1.65;
     public String               outputFilename  = "data.csv";
     public Boolean              headers         = true;
     public Boolean              verbose         = false;
     public VCOutputFormat       outputFormat    = VCOutputFormat.csv;
     public SupportedChartTypes  chartType       = SupportedChartTypes.line;
     public String               clockOutPin     = "1";
+
+
+    public int getTriggerVector() {
+        if (triggerVoltage==null || triggerVoltage>=0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 
 
 }

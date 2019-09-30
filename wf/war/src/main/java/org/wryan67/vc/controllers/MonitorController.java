@@ -83,6 +83,7 @@ public class MonitorController {
         logger.info(options.toString());
 
 
+
         String cmd=buildCommand(options, "/tmp/data.csv");
         logger.info(cmd);
         List<String> messages=new ArrayList<>();
@@ -183,7 +184,7 @@ public class MonitorController {
 
         if (exists(request, triggerVoltage)) {
             try {
-                options.triggerVoltage=new Double(getParameter(request,triggerVoltage));
+                options.triggerVoltage=new Float(getParameter(request,triggerVoltage));
                 if (options.triggerVoltage!=0.0) {
                     if (Math.abs(options.triggerVoltage) < minTriggerVoltage || Math.abs(options.triggerVoltage) > maxTriggerVoltage) {
                         messages.add("trigger voltage out of valid range");

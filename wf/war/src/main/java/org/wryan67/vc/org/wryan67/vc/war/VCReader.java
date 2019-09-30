@@ -1,7 +1,6 @@
 package org.wryan67.vc.org.wryan67.vc.war;
 
 import org.apache.log4j.Logger;
-import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
 import org.wryan67.vc.controllers.MonitorController;
 import org.wryan67.vc.models.OptionsModel;
@@ -21,6 +20,14 @@ public class VCReader implements Runnable {
 
     public static boolean run=false;
     public static OptionsModel options=new OptionsModel();
+    private boolean triggerMet=false;
+    private float  lastVolts;
+    private boolean foundMax =false;
+    private boolean foundMin =false;
+    private int triggerVector=1;
+    private float max;
+    private float min ;
+
 
     public static void stopMonitor() {
         if (vc != null) {
@@ -75,18 +82,35 @@ public class VCReader implements Runnable {
 
         initSeries(series, channels);
 
+        boolean firstLine=true;
+
 
         try (BufferedReader br = Files.newBufferedReader(Paths.get("/tmp/data.pipe"))) {
             String line;
+
             while ((line = br.readLine()) != null && run) {
+                String parts[] = line.split(",");
+                Float currVoltage=new Float((parts[0+2]));
+
+                if (firstLine) {
+                    resetTrigger(currVoltage);
+                    firstLine=false;
+                }
+
+                if (!checkTrigger(currVoltage)) {
+                    continue;
+                } else {
+//                    logger.info("triggerMet: volts="+currVoltage);
+                }
+
                 if (++count%options.samples==0) {
                     saveChartData(series);
                     initSeries(series, channels);
                     count=0;
+                    resetTrigger(currVoltage);
                 }
 
-                String parts[] = line.split(",");
-                Double x=new Double(parts[1]);
+                Float x=new Float(parts[1]);
                 for (int i=0;i<channels;++i) {
                     series.get(i).add(x, new Double(parts[i+2]));
                 }
@@ -104,13 +128,95 @@ public class VCReader implements Runnable {
         stopMonitor();
     }
 
+    private void resetTrigger(float volts) {
+        triggerMet=options.triggerVoltage==null;
+        lastVolts=volts;
+
+        foundMax = false;
+        foundMin = false;
+
+        max = options.triggerVoltage*(float)1.1;
+        min = options.triggerVoltage*(float)0.9;
+
+        triggerVector=options.getTriggerVector();
+    }
+
+    private boolean checkTrigger(float volts) {
+        if (triggerMet) return triggerMet;
+
+        float vector = volts - lastVolts;
+        lastVolts = volts;
+
+        if (vector == 0) {
+            return false;
+        }
+
+        if (triggerVector > 0) {  // trigger on the rise
+            if (!foundMax) {
+                if (volts >= max) {
+                    foundMax = true;
+                }
+                return false;
+            }
+            if (!foundMin) {
+                if (volts<=min) {
+                    foundMin =true;
+                }
+                return false;
+            }
+
+            if (vector < 0) {    // is falling
+                return false;
+            } else {
+                if (volts >= options.triggerVoltage) {
+                    logger.info("triggerMet: volts="+volts);
+                    triggerMet = true;
+                    return true;
+                }
+            }
+
+        } else {  // trigger on the fall
+            if (!foundMin) {
+                if (volts>min) {
+                    return false;
+                }
+                foundMin =true;
+                return false;
+            }
+            if (!foundMax) {
+                if (volts<max) {
+                    return false;
+                }
+                foundMax =true;
+            }
+
+            if (vector > 0) {   // is rising
+                return false;
+            } else {
+                if (volts <= options.triggerVoltage) {
+                    logger.info("triggerMet: volts="+volts);
+                    triggerMet = true;
+                    return true;
+                }
+            }
+        }
+
+
+        return triggerMet;
+    }
+
+
+
     private void saveChartData(ArrayList<XYSeries> series) {
         synchronized (data) {
-            int items=series.get(0).getItemCount();
-            XYDataItem firstItem = (XYDataItem) series.get(0).getItems().get(0);
-            XYDataItem lastItem  = (XYDataItem) series.get(0).getItems().get(items-1);
+//            int items=series.get(0).getItemCount();
+//            XYDataItem item0 = (XYDataItem) series.get(0).getItems().get(0);
+//            XYDataItem item1 = (XYDataItem) series.get(0).getItems().get(1);
+//
+//            logger.info("row 0: X="+item0.getX()+" Y="+item0.getY());
+//            logger.info("row 1: X="+item1.getX()+" Y="+item1.getY());
 
-            long elapsed=lastItem.getX().longValue()-firstItem.getX().longValue();
+           // long elapsed=lastItem.getX().longValue()-firstItem.getX().longValue();
 
 //            logger.info(String.format("elapsed = %dms  sps=%6.0f", elapsed/1000, 1000000.0 * items / elapsed));
 
