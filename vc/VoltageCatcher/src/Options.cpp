@@ -29,7 +29,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		usage();
 	}
 
-	const char* shortOptions = "c:d:f:hlmo:s:t:v";
+	const char* shortOptions = "c:d:f:hlmo:r:s:t:v";
 
 	static struct option longOptions[] = {
 		{"channel",	    required_argument, NULL, 'c'},
