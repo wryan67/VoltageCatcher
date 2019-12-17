@@ -92,7 +92,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 			break;
 
         case 'r':
-            sscanf(optarg, "%r", &refVolts);
+            sscanf(optarg, "%f", &refVolts);
             break;
 
 		case 's':
