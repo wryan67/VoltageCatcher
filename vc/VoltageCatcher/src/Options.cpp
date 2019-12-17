@@ -11,7 +11,8 @@ void Options::usage() {
 	fprintf(stderr, "  -l = gpio load spi\n");
 	fprintf(stderr, "  -m = daemon mode\n");
 	fprintf(stderr, "  -o = output file name\n");
-	fprintf(stderr, "  -s = samples [1-40000]\n");
+    fprintf(stderr, "  -r = reference voltage, default=3.3\n");
+    fprintf(stderr, "  -s = samples [1-40000]\n");
 	fprintf(stderr, "  -t = trigger voltage [+/-][%.2f-%.2f]; default=1.65\n", triggerMin, triggerMax);
 	fprintf(stderr, "          0 volts--disable triggering\n");
 	fprintf(stderr, "          + volts--trigger when rising\n");
@@ -31,16 +32,17 @@ bool Options::commandLineOptions(int argc, char **argv) {
 	const char* shortOptions = "c:d:f:hlmo:s:t:v";
 
 	static struct option longOptions[] = {
-		{"channel",	required_argument, NULL, 'c'},
-		{"debug",	optional_argument, NULL, 'd'},
-		{"freq",	required_argument, NULL, 'f'},
-		{"headers",	optional_argument, NULL, 'h'},
-		{"loadSPI", optional_argument, NULL, 'l'},
-		{"daemon",	optional_argument, NULL, 'm'},
-		{"output",	required_argument, NULL, 'o'},
-		{"samples", required_argument, NULL, 's'},
-		{"trigger", optional_argument, NULL, 't'},
-		{"verbose", optional_argument, NULL, 'v'},
+		{"channel",	    required_argument, NULL, 'c'},
+		{"debug",	    optional_argument, NULL, 'd'},
+		{"freq",	    required_argument, NULL, 'f'},
+		{"headers",     optional_argument, NULL, 'h'},
+		{"loadSPI",     optional_argument, NULL, 'l'},
+		{"daemon",	    optional_argument, NULL, 'm'},
+		{"output",      required_argument, NULL, 'o'},
+        {"revVoltage",  optional_argument, NULL, 'r'},
+        {"samples",     required_argument, NULL, 's'},
+		{"trigger",     optional_argument, NULL, 't'},
+		{"verbose",     optional_argument, NULL, 'v'},
 		{0, 0, 0, 0}
 	};
 
@@ -88,6 +90,10 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		case 'o':
 			sampleFileName = optarg;
 			break;
+
+        case 'r':
+            sscanf(optarg, "%r", &refVolts);
+            break;
 
 		case 's':
 			sscanf(optarg, "%d", &sampleCount);
