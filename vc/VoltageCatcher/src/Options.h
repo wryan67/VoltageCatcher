@@ -15,8 +15,8 @@ extern int channels[MCP3008_CHANNELS + 1];
 class Options {
 public:
 
-	int  channelType = MCP3008_SINGLE;
-	double refVolts = 3.3;
+	int   channelType = MCP3008_SINGLE;
+	float refVolts = 3.3;
 
 	int   desiredSPSk = -1;
 	int   sampleCount = 0;
