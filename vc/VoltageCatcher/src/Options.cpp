@@ -156,7 +156,8 @@ bool Options::commandLineOptions(int argc, char **argv) {
 
 	printf("samples=%d\n", sampleCount);
 	printf("freq=%d\n", desiredSPSk);
-	printf("trigger voltage=%f\n", triggerVoltage);
+    printf("reference voltage=%f\n", refVolts);
+    printf("trigger voltage=%f\n", triggerVoltage);
 	printf("trigger vector=%s\n", (triggerVector > 0) ? "rising" : "falling");
 
 
