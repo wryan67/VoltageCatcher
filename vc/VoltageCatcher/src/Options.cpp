@@ -32,15 +32,15 @@ bool Options::commandLineOptions(int argc, char **argv) {
 	const char* shortOptions = "c:d:f:hlmo:r:s:t:v";
 
 	static struct option longOptions[] = {
-		{"channel",	    required_argument, NULL, 'c'},
-		{"debug",	    optional_argument, NULL, 'd'},
-		{"freq",	    required_argument, NULL, 'f'},
+		{"channel",     required_argument, NULL, 'c'},
+		{"debug",       optional_argument, NULL, 'd'},
+		{"freq",        required_argument, NULL, 'f'},
 		{"headers",     optional_argument, NULL, 'h'},
 		{"loadSPI",     optional_argument, NULL, 'l'},
-		{"daemon",	    optional_argument, NULL, 'm'},
+		{"daemon",      optional_argument, NULL, 'm'},
 		{"output",      required_argument, NULL, 'o'},
-        {"revVoltage",  optional_argument, NULL, 'r'},
-        {"samples",     required_argument, NULL, 's'},
+                {"revVoltage",  optional_argument, NULL, 'r'},
+                {"samples",     required_argument, NULL, 's'},
 		{"trigger",     optional_argument, NULL, 't'},
 		{"verbose",     optional_argument, NULL, 'v'},
 		{0, 0, 0, 0}
