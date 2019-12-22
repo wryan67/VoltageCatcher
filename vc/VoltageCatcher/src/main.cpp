@@ -364,7 +364,11 @@ bool checkTrigger(float volts) {
 
 void breakOut(int out) {
 	if (out < 1) {
-		fclose(options.sampleFile);
+        if (options.zetaMode) {
+            fclose(options.zetaOutput);
+        } else {
+            fclose(options.sampleFile);
+        }
 		exit(0);
 	}
 }
@@ -382,14 +386,19 @@ void takeSampleActivation(void) {
 				takeSample(i);
 			}
 
-
-			breakOut(fprintf(options.sampleFile, "%lld,%lld", daemonSample++,  samples[options.sampleIndex][channels[0]].timestamp.count() - samples[0][channels[0]].timestamp.count()));
+            FILE* out;
+            if (options.zetaMode) {
+                out = options.zetaOutput;
+            } else {
+                out = options.sampleFile;
+            }
+			breakOut(fprintf(out, "%lld,%lld", daemonSample++,  samples[options.sampleIndex][channels[0]].timestamp.count() - samples[0][channels[0]].timestamp.count()));
 
 			for (int i = 0; channels[i] >= 0; ++i) {
-				breakOut(fprintf(options.sampleFile, ",%f", samples[options.sampleIndex][channels[i]].volts));
+				breakOut(fprintf(out, ",%f", samples[options.sampleIndex][channels[i]].volts));
 			}
 
-			breakOut(fprintf(options.sampleFile, "\n")); 
+			breakOut(fprintf(out, "\n")); 
 
 			if (options.sampleIndex == 0) {
 				++options.sampleIndex;
@@ -441,6 +450,28 @@ void pwmDutyCycle(int pwmOutputPin, int speed) {
 
 }
 
+void* zetaRead(void*) {
+    options.zetaInput = fopen(options.zetaFileName, "r");
+
+    char buf[8192];
+
+    while (fgets(buf, sizeof(buf), options.zetaInput)) {
+        fprintf(stderr, "%s", buf);
+    }
+    printf("zetaRead-ends\n"); fflush(stdout);
+
+}
+
+void setupZeta() {
+    char cmd[128];
+    sprintf(cmd, "mknod %s p", options.zetaFileName);
+    system(cmd);
+
+    pthread_t zetaReadId = threadCreate(zetaRead, "zetaRead");
+
+    options.zetaOutput = fopen(options.zetaFileName, "w");
+}
+
 int main(int argc, char **argv)
 {
 	if (setuid(0) != 0) {
@@ -450,14 +481,17 @@ int main(int argc, char **argv)
 	char cmd[128];
 
 
-//	sprintf(cmd,"/home/wryan/bin/vc.pids.sh %d %d\n", getpid(), getppid());
-//	system(cmd);
 	sprintf(cmd, "ps -ef | awk '{if (/usr.local.bin.vc / && !/awk/ && $2!=%d && $2!=%d) system(sprintf(\"kill -9 %%d\",$2))}'", getpid(),getppid());
 	system(cmd);
 
 	if (!options.commandLineOptions(argc, argv)) {
 		exit(1);
 	}
+
+    if (options.zetaMode) {
+        setupZeta();
+    }
+
 
 	options.sampleFile = fopen(options.sampleFileName, "w");
 	if (options.sampleFile == NULL) {
@@ -476,7 +510,7 @@ int main(int argc, char **argv)
 	printf("output file: %s\n", options.sampleFileName);
 	printf("daemon mode: %s\n", (options.daemon)?"true":"false");
 
-
+    
 
 	if (wiringPiISR(ClockInPin, INT_EDGE_BOTH, &takeSampleActivation) < 0)
 	{
@@ -485,9 +519,9 @@ int main(int argc, char **argv)
 	}
 
 
+ 
 
-
-	printf("priming...\n");
+    printf("priming...\n"); fflush(stdout);
 
 	int primeCount = 150000;
 

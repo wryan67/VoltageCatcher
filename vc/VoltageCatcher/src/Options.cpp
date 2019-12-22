@@ -1,5 +1,22 @@
 #include "main.h"
 
+char *Options::getGUID() {
+    uuid_t uuid;
+
+    char uuid_str[37];
+    char* uuid_nodash =(char *)malloc(33);
+    uuid_generate_random(uuid);
+    uuid_unparse_lower(uuid, uuid_str);
+
+    int t = 0;
+    for (int k = 0; uuid_str[k] > 0; ++k) {
+        if (uuid_str[k] != '-') {
+            uuid_nodash[t++] = uuid_str[k];
+        }
+    } uuid_nodash[t] = 0;
+    uuid_nodash[32] = 0;
+    return uuid_nodash;
+}
 
 void Options::usage() {
 	fprintf(stderr, "usage: vc -s samples\n");
@@ -31,7 +48,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		usage();
 	}
 
-	const char* shortOptions = "c:d:f:hlmo:r:s:t:vx:";
+	const char* shortOptions = "c:d:f:hlmo:r:s:t:vx:z";
 
 	static struct option longOptions[] = {
 		{"channel",     required_argument, NULL, 'c'},
@@ -46,6 +63,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		{"trigger",     optional_argument, NULL, 't'},
 		{"verbose",     optional_argument, NULL, 'v'},
         {"scale",       optional_argument, NULL, 'x'},
+        {"zeta",        optional_argument, NULL, 'z'},
         {0, 0, 0, 0}
 	};
 
@@ -114,6 +132,12 @@ bool Options::commandLineOptions(int argc, char **argv) {
             sscanf(optarg, "%f", &sampleScale);
             break;
 
+        case 'z':
+            daemon = true;
+            zetaMode = true;         
+            sprintf(zetaFileName, "/tmp/.vc.internal.%s", getGUID());
+
+            break;
 
 		case '?':
 			if (optopt == 'm' || optopt == 't')

@@ -48,7 +48,7 @@
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
-      <LibraryDependencies>pthread;wiringPi;wiringPiDev;m</LibraryDependencies>
+      <LibraryDependencies>pthread;wiringPi;wiringPiDev;m;uuid</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
       <Command>gpio export 17 out</Command>

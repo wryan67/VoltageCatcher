@@ -17,7 +17,7 @@ OBJ_2      := $(addprefix $(DIR_OBJ),$(OBJ_O))
 CC       := g++
 CFLAGS   := -c -O2 -D $(USELIB) -std=gnu++11 
 DFLAGS   := -c -O2 -D $(USELIB)
-LDFLAGS  := -pthread -lwiringPi -lm
+LDFLAGS  := -pthread -lwiringPi -lm -luuid
 SOURCES  := main.cpp Options.cpp Display.cpp
 
 TOOLS    := Sample.cpp stringUtil.cpp

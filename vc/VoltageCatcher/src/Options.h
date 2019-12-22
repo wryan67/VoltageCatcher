@@ -1,5 +1,8 @@
 #pragma once
 
+#include <uuid/uuid.h>
+
+
 #include "./tools/include/Sample.h"
 #include "./tools/include/bcmPWMClockDivisors.h"
 #include "./tools/include/stringUtil.h"
@@ -31,6 +34,7 @@ public:
 	bool daemon = false;
 	bool suppressHeaders = false;
 	bool verboseOutput = false;
+    bool zetaMode = false;
 
 	// PWM
 	int pwmClockDivider = BCM2835_PWM_CLOCK_DIVIDER_256;
@@ -48,9 +52,14 @@ public:
     int  actualSPS;
     float sampleScale = 1.0;
 
+    char zetaFileName[128];
+    FILE *zetaInput;
+    FILE* zetaOutput;
 
 // methods
 	void usage();
+
+    char* getGUID();
 
 	bool commandLineOptions(int argc, char ** argv);
 
