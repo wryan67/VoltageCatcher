@@ -3,11 +3,22 @@
 # Use this command to place "vc" into /usr/local/bin 
 # $ make clean && make && make install 
 #
+USELIB     := USE_WIRINGPI_LIB
+DIR_Config := ./tools/display/Config
+DIR_Fonts  := ./tools/display/Fonts
+DIR_LCD    := ./tools/display/LCD
+DIR_GUI    := ./tools/display/GUI
+DIR_OBJ    := ../obj
+OBJ_C      := $(wildcard ${DIR_Config}/*.c ${DIR_LCD}/*.c ${DIR_GUI}/*.c  ${DIR_Fonts}/*.c)
+OBJ_O      := $(patsubst %.c,${DIR_BIN}/%.o,$(notdir ${OBJ_C}))
+OBJ_2      := $(addprefix $(DIR_OBJ),$(OBJ_O))
+
 
 CC       := g++
-CFLAGS   := -c -O2 -std=gnu++11
-LDFLAGS  := -pthread -lwiringPi
-SOURCES  := main.cpp Options.cpp 
+CFLAGS   := -c -O2 -D $(USELIB) -std=gnu++11 
+DFLAGS   := -c -O2 -D $(USELIB)
+LDFLAGS  := -pthread -lwiringPi -lm
+SOURCES  := main.cpp Options.cpp Display.cpp
 
 TOOLS    := Sample.cpp stringUtil.cpp
 TOOLDIR  := tools/util
@@ -39,31 +50,45 @@ debug:
 	@echo HEADERS=$(HEADERS)
 	@echo SRC=$(SRC)
 	@echo OBJ=$(OBJ)
+	@echo OBJ_C=$(OBJ_C)
+	@echo OBJ_O=$(OBJ_O)
+	@echo OBJ_2=$(OBJ_2)
 	@echo ":::::::: all ::::::::::"
 
 tasks: all
 
-$(EXECUTABLE): $(OBJECTS) $(TOBJ)
+$(EXECUTABLE): $(OBJECTS) $(TOBJ) $(OBJ_O)
 	@echo linking...
 	@mkdir -p ../bin
-	@$(CC) $(OBJECTS) $(TOBJ) $(LDFLAGS) -o $@
+	@$(CC) $(OBJECTS) $(TOBJ) $(LDFLAGS) $(OBJ_2) -o $@
 
 ../obj/$(TOOLDIR)/%.o: 
-	@echo compiling $(*D)/$(TOOLDIR)/$(*F).cpp
+	@echo compiling tool $(*D)/$(TOOLDIR)/$(*F).cpp
 	@echo "$< -> $@"
 	@mkdir -p ../obj/tools/util
-	$(CC) $(CFLAGS) $(*D)/$(TOOLDIR)/$(*F).cpp -o $@
+	$(CC) $(CFLAGS) $(*D)/$(TOOLDIR)/$(*F).cpp -o $@  
 
-
-#tools/util/Sample.cpp: 
-#	@$(CC) $(CFLAGS) $(*D)/$(*F).cpp -o $@
-
-# works
 ../obj/%.o: %.h %.cpp
-	@echo compiling $(*D)/$(*F).cpp
+	@echo compiling module $(*D)/$(*F).cpp
 	@echo "$< -> $@"
 	@mkdir -p ../obj
-	@$(CC) $(CFLAGS) $(*D)/$(*F).cpp -o $@
+	$(CC) $(CFLAGS) $(*D)/$(*F).cpp -o $@ -I $(DIR_Config)  -I $(DIR_LCD)  -I $(DIR_GUI)   -I $(DIR_Fonts)
+
+
+${DIR_BIN}/%.o : $(DIR_GUI)/%.c
+	gcc $(DFLAGS) -c  $< -o $(DIR_OBJ)/$@ $(LIB) -I $(DIR_Config)  -I $(DIR_LCD)  -I $(DIR_Fonts)
+
+${DIR_BIN}/%.o : $(DIR_LCD)/%.c
+	gcc $(DFLAGS) -c  $< -o $(DIR_OBJ)/$@ $(LIB) -I $(DIR_Config)
+
+${DIR_BIN}/%.o : $(DIR_Fonts)/%.c
+	gcc $(DFLAGS) -c  $< -o $(DIR_OBJ)/$@ $(LIB) -I $(DIR_Config)
+
+${DIR_BIN}/%.o : $(DIR_Config)/%.c
+	gcc $(DFLAGS) -c  $< -o $(DIR_OBJ)/$@ $(LIB)
+
+
+
 
 install: all
 	@echo Installing to /usr/local/bin
