@@ -45,7 +45,7 @@ public:
 	int   debugLevel = 0;
 	char *sampleFileName;
 	FILE *sampleFile;
-
+    int  actualSPS;
     float sampleScale = 1.0;
 
 

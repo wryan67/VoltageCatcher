@@ -56,22 +56,53 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
     for (int v = 1; v < options.refVolts; ++v) {
         int y= maxY - ((v / options.refVolts) * maxY);
         Paint_DrawLine(1, y, maxX, y, BROWN, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
-    }   Paint_DrawLine(1, 1, maxX, 1, BLUE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
+    }   Paint_DrawLine(1, 1, maxX, 1, DARKBLUE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
 
 
     // y-axis
     Paint_DrawLine(1, maxY, 1,    1,    WHITE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
 
-    Sample s = samples[0][0];
 
-    int ly = maxY - ((s.volts / options.refVolts) * maxY);
+    int lineColor[MCP3008_CHANNELS + 1] = {
+        //1      2     3        4      5         6        7      8    
+        //                            orange
+        YELLOW, GREEN, MAGENTA, CYAN,  BRRED,   RED, LIGHTBLUE, LGRAY
+    };
+
+    char message[32];
+    sprintf(message, "%4.2f", options.refVolts);
+    Paint_DrawString_EN(1, 1, message, &Font24, BLACK, LGRAY);
+
+
+    Sample s;
+    int ly[MCP3008_CHANNELS + 1];
+
+    for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
+        s = samples[0][channels[channelIndex]];
+        ly[channelIndex] = maxY - ((s.volts / options.refVolts) * maxY);
+        //printf("channelIndex=%d\n", channelIndex);
+    }
 
     for (int x = 1; x < LCD_HEIGHT; ++x) {
-        int sx = x * options.sampleScale;
-        s = samples[sx][0];
-        int y = maxY - ((s.volts / options.refVolts) * maxY);
-        Paint_DrawLine(x - 1, ly, x, y, YELLOW, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
-        ly = y;
+        for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
+            int sx = x * options.sampleScale;
+            s = samples[sx][channels[channelIndex]];
+            int y = maxY - ((s.volts / options.refVolts) * maxY);
+            Paint_DrawLine(x - 1, ly[channelIndex], x, y, lineColor[channels[channelIndex]], LINE_STYLE_SOLID, DOT_PIXEL_1X1);
+            ly[channelIndex] = y;
+        }
+    }
+
+    sprintf(message, "%d-sps", options.actualSPS);
+    Paint_DrawString_EN(maxX - (17 * strlen(message)), 1, message, &Font24, BLACK, WHITE);
+
+    
+    sprintf(message, "ch", options.refVolts);
+    Paint_DrawString_EN(maxX - (17 * strlen(message)), 24, message, &Font24, DARKBLUE, LGRAY);
+
+    for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
+        sprintf(message, "%d", channels[channelIndex]);
+        Paint_DrawString_EN(maxX - (17 * strlen(message)), 24 * (channelIndex + 2), message, &Font24, BLACK, lineColor[channels[channelIndex]]);
     }
 
 

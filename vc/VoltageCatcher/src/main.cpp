@@ -261,8 +261,9 @@ void dumpResults() {
 		printf("maxVolt,%.3f\n", maxVolt);
 	}
 
-	long sps = 1000000.0 * options.sampleCount / elapsed;
-	printf("sps=%'ld\n", sps);
+    options.actualSPS = 1000000.0 * options.sampleCount / elapsed;
+    
+	printf("sps=%d\n", options.actualSPS);
 
     displayResults(options, samples);
 	
