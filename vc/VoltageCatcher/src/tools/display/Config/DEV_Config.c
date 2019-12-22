@@ -154,10 +154,10 @@ void GPIO_Config(void)
 {
     int Equipment = DEV_Equipment_Testing();
     if(Equipment=='R'){
-		DEV_RST_PIN = 27;//
-		DEV_DC_PIN = 25;//
-		DEV_CS_PIN = 12;//
-		DEV_BL_PIN = 18;//
+		DEV_RST_PIN = 2;//  27=bcm   wpi=2
+		DEV_DC_PIN = 6;//   25=bcm   wpi=6
+		DEV_CS_PIN = 26;//   12=bcm  wpi=26
+		DEV_BL_PIN = 29;//   21=bcm  wpi=29;
 		
     }else if(Equipment=='J'){
         #if USE_DEV_LIB
@@ -198,7 +198,7 @@ void DEV_SPI_Init(uint32_t Speed)
         bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);     //enable cs0
         
     #elif USE_WIRINGPI_LIB
-        printf("WIRINGPI SPI Device\r\n");       
+        //printf("WIRINGPI SPI Device\r\n");       
         //wiringPiSPISetup(0,9000000);
         wiringPiSPISetupMode(0, Speed, 0);
         
@@ -363,7 +363,7 @@ UBYTE DEV_ModuleInit(void)
     printf("USE_DEV_LIB \r\n");
 #endif
     GPIO_Config();
-    DEV_SPI_Init(60000000);
+    DEV_SPI_Init(90000000);
     
     return 0;
 }

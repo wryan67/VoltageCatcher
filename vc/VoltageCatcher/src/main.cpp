@@ -5,13 +5,14 @@
 
 
 #include "main.h"
-
+#include "DEV_Config.h"
 
 Options options = Options();
 Sample  samples[maxSamples + 1][MCP3008_CHANNELS] = { Sample() };
 int     channels[MCP3008_CHANNELS + 1];
 
 
+pthread_mutex_t screenLock;
 
 
 
@@ -78,6 +79,9 @@ bool setup() {
         }
     }
 
+    if (options.zetaMode) {
+        spiSpeed = 9000000;
+    }
 
 
 	if ((options.spiHandle = wiringPiSPISetup(options.spiChannel, spiSpeed)) < 0)
@@ -273,6 +277,8 @@ void dumpResults() {
 
 unsigned int readChannel(int channel)
 {
+    pthread_mutex_lock(&screenLock);
+
 	if (0 > channel || channel > 7) {
 		return -1;
 	}
@@ -281,6 +287,8 @@ unsigned int readChannel(int channel)
 	buffer[1] = (options.channelType + channel) << 4;
 
 	wiringPiSPIDataRW(options.spiChannel, buffer, 3);
+
+    pthread_mutex_unlock(&screenLock);
 
 	return ((buffer[1] & 3) << 8) + buffer[2];
 }
@@ -450,13 +458,95 @@ void pwmDutyCycle(int pwmOutputPin, int speed) {
 
 }
 
+void frame(long frame) {
+    
+
+    UBYTE* BlackImage;
+    UDOUBLE Imagesize = LCD_WIDTH * LCD_HEIGHT * 2;
+    //printf("Imagesize = %ld\r\n", Imagesize);
+    if ((BlackImage = (UBYTE*)malloc(Imagesize)) == NULL) {
+        printf("Failed to allocate memory for black image...\r\n");
+        exit(0);
+    }
+
+    Paint_NewImage(BlackImage, LCD_WIDTH, LCD_HEIGHT, 0, WHITE);
+    Paint_Clear(BLACK);
+    Paint_SetRotate(270);
+
+
+    int maxX = LCD_HEIGHT;
+    int maxY = LCD_WIDTH;
+    int midY = LCD_WIDTH / 2;
+    //                    320           240
+//    Paint_DrawCircle(LCD_HEIGHT / 2, LCD_WIDTH / 2, 25, GREEN, DRAW_FILL_EMPTY, DOT_PIXEL_2X2);
+
+    // x-axis
+    Paint_DrawLine(1, maxY, maxX, maxY, WHITE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
+
+    for (int v = 1; v < options.refVolts; ++v) {
+        int y = maxY - ((v / options.refVolts) * maxY);
+        Paint_DrawLine(1, y, maxX, y, BROWN, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
+    }   Paint_DrawLine(1, 1, maxX, 1, DARKBLUE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
+
+
+    // y-axis
+    Paint_DrawLine(1, maxY, 1, 1, WHITE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
+
+
+    int lineColor[MCP3008_CHANNELS + 1] = {
+        //1      2     3        4      5         6        7      8    
+        //                            orange
+        YELLOW, GREEN, MAGENTA, CYAN,  BRRED,   RED, LIGHTBLUE, LGRAY
+    };
+
+    char message[32];
+    sprintf(message, "%4.2f", options.refVolts);
+    Paint_DrawString_EN(1, 1, message, &Font24, BLACK, LGRAY);
+
+    sprintf(message, "%ld-frame", frame);
+    Paint_DrawString_EN(maxX - (17 * strlen(message)), 1, message, &Font24, BLACK, WHITE);
+    LCD_Display(BlackImage);
+
+    free(BlackImage);
+}
+
 void* zetaRead(void*) {
     options.zetaInput = fopen(options.zetaFileName, "r");
 
     char buf[8192];
 
     while (fgets(buf, sizeof(buf), options.zetaInput)) {
-        fprintf(stderr, "%s", buf);
+        //fprintf(stderr, "%s", buf);
+        char *c1 = strstr(buf, ",");
+        char sample[32];
+        strncpy(sample, buf, c1 - buf);
+
+        long n;
+        sscanf(sample, "%ld", &n);
+        if (n % 100 == 0) {
+            fprintf(stderr, "sample %ld\n",n);
+
+            pthread_mutex_lock(&screenLock);
+
+            close(options.spiHandle);
+            options.spiHandle = wiringPiSPISetup(options.spiChannel, 32000000);
+
+            digitalWrite(7, HIGH);
+            digitalWrite(8, HIGH);
+            digitalWrite(26, LOW);
+
+            
+            frame(n);
+            close(options.spiHandle);
+            options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
+
+            digitalWrite(7, LOW);
+            digitalWrite(8, LOW);
+            digitalWrite(26, HIGH);
+
+            pthread_mutex_unlock(&screenLock);
+        }
+
     }
     printf("zetaRead-ends\n"); fflush(stdout);
 
@@ -466,6 +556,11 @@ void setupZeta() {
     char cmd[128];
     sprintf(cmd, "mknod %s p", options.zetaFileName);
     system(cmd);
+
+    if (pthread_mutex_init(&screenLock, NULL) != 0) {
+        printf("\n mutex init has failed\n");
+        exit(9);
+    }
 
     pthread_t zetaReadId = threadCreate(zetaRead, "zetaRead");
 
@@ -488,21 +583,43 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-    if (options.zetaMode) {
-        setupZeta();
-    }
-
-
-	options.sampleFile = fopen(options.sampleFileName, "w");
-	if (options.sampleFile == NULL) {
-		fprintf(stderr, "cannot open output file '%s': %s\n", options.sampleFileName, strerror(errno));
-		exit(2);
-	}
+ 
 
 	if (!setup()) {
 		printf("setup failed\n");
 		exit(2);
 	}
+    
+    GPIO_Config();
+
+    pinMode(7,  OUTPUT);
+    pinMode(8,  OUTPUT);
+    pinMode(26, OUTPUT);
+    digitalWrite(7, HIGH);
+    digitalWrite(8, HIGH);
+    digitalWrite(26, LOW);
+    LCD_Init();
+    LCD_Clear(BLACK);
+
+    digitalWrite(7, LOW);
+    digitalWrite(8, LOW);
+    digitalWrite(26, HIGH);
+
+
+    pinMode(26, OUTPUT);
+    digitalWrite(26, HIGH);
+
+    if (options.zetaMode) {
+        setupZeta();
+    }
+
+
+    options.sampleFile = fopen(options.sampleFileName, "w");
+    if (options.sampleFile == NULL) {
+        fprintf(stderr, "cannot open output file '%s': %s\n", options.sampleFileName, strerror(errno));
+        exit(2);
+    }
+
 
 	printf("setup event triggers\n");
 

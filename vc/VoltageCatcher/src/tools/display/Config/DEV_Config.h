@@ -46,8 +46,11 @@ extern int DEV_CS_PIN;//8
 extern int DEV_BL_PIN;//18
 
 /*------------------------------------------------------------------------------------------------------*/
-uint8_t DEV_ModuleInit(void);
+//uint8_t DEV_ModuleInit(void);
 void    DEV_ModuleExit(void);
+void GPIO_Config(void);
+
+UBYTE DEV_ModuleInit(void);
 
 void DEV_I2C_Init(uint8_t Add);
 void I2C_Write_Byte(uint8_t Cmd, uint8_t value);
