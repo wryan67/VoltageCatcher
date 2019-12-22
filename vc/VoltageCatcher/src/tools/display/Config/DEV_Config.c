@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+
+
 uint32_t fd;
 int DEV_RST_PIN;//
 int DEV_DC_PIN;//

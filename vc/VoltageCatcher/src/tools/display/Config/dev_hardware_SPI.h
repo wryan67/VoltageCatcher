@@ -47,6 +47,12 @@
 #define SPI_MODE_2      (SPI_CPOL|0)
 #define SPI_MODE_3      (SPI_CPOL|SPI_CPHA)
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif  
+
+
 typedef enum{
     SPI_MODE0 = SPI_MODE_0,  /*!< CPOL = 0, CPHA = 0 */
     SPI_MODE1 = SPI_MODE_1,  /*!< CPOL = 0, CPHA = 1 */
@@ -116,5 +122,8 @@ int DEV_HARDWARE_SPI_ChipSelect(SPIChipSelect CS_Mode);
 int DEV_HARDWARE_SPI_CSEN(SPICSEN EN);
 int DEV_HARDWARE_SPI_Mode(SPIMode mode);
 
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif

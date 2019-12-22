@@ -38,6 +38,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "fonts.h"
 
+
+
+  
+
+
 // 
 //  Font data for Courier New 12pt
 // 
@@ -1380,5 +1385,8 @@ sFONT Font12 = {
   7, /* Width */
   12, /* Height */
 };
+
+
+
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

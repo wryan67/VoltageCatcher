@@ -35,7 +35,14 @@
 #define LCD_WIDTH   240 //LCD width
 #define LCD_HEIGHT  320 //LCD height
 
- 
+
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif  
+
+
 void LCD_WriteData_Word(UWORD da);
 
 void LCD_SetCursor(UWORD X, UWORD Y);
@@ -49,4 +56,13 @@ void LCD_ClearWindow(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend,UWORD co
 
 
 void LCD_Display(UBYTE *image);
+
+
+
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
+
 #endif

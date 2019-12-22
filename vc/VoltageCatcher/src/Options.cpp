@@ -18,6 +18,8 @@ void Options::usage() {
 	fprintf(stderr, "          + volts--trigger when rising\n");
 	fprintf(stderr, "          - volts--trigger when falling\n");
 	fprintf(stderr, "  -v = verbose output\n");
+    fprintf(stderr, "  -x = sample display scale (default=1.0\n");
+
 
 	exit(1);
 }
@@ -29,7 +31,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		usage();
 	}
 
-	const char* shortOptions = "c:d:f:hlmo:r:s:t:v";
+	const char* shortOptions = "c:d:f:hlmo:r:s:t:vx:";
 
 	static struct option longOptions[] = {
 		{"channel",     required_argument, NULL, 'c'},
@@ -43,7 +45,8 @@ bool Options::commandLineOptions(int argc, char **argv) {
         {"samples",     required_argument, NULL, 's'},
 		{"trigger",     optional_argument, NULL, 't'},
 		{"verbose",     optional_argument, NULL, 'v'},
-		{0, 0, 0, 0}
+        {"scale",       optional_argument, NULL, 'x'},
+        {0, 0, 0, 0}
 	};
 
 	while ((c = getopt_long(argc, argv, shortOptions, longOptions, &index)) != -1) {
@@ -106,6 +109,10 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		case 'v':
 			verboseOutput = true;
 			break;
+
+        case 'x':
+            sscanf(optarg, "%f", &sampleScale);
+            break;
 
 
 		case '?':

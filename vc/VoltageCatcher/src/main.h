@@ -23,7 +23,8 @@
 #include "Options.h"
 #include "./tools/include/threads.h"
 
-
+// spi display
+#include "Display.h"
 
 using namespace std;
 using namespace std::chrono;

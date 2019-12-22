@@ -48,7 +48,7 @@
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
-      <LibraryDependencies>pthread;wiringPi;wiringPiDev;</LibraryDependencies>
+      <LibraryDependencies>pthread;wiringPi;wiringPiDev;m</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
       <Command>gpio export 17 out</Command>
@@ -65,16 +65,43 @@
     </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Display.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Options.cpp" />
+    <ClCompile Include="src\tools\display\Config\DEV_Config.c" />
+    <ClCompile Include="src\tools\display\Config\dev_hardware_i2c.c" />
+    <ClCompile Include="src\tools\display\Config\dev_hardware_SPI.c" />
+    <ClCompile Include="src\tools\display\Config\sysfs_gpio.c" />
+    <ClCompile Include="src\tools\display\Fonts\font12.c" />
+    <ClCompile Include="src\tools\display\Fonts\font12CN.c" />
+    <ClCompile Include="src\tools\display\Fonts\font16.c" />
+    <ClCompile Include="src\tools\display\Fonts\font20.c" />
+    <ClCompile Include="src\tools\display\Fonts\font24.c" />
+    <ClCompile Include="src\tools\display\Fonts\font24CN.c" />
+    <ClCompile Include="src\tools\display\Fonts\font8.c" />
+    <ClCompile Include="src\tools\display\GUI\GUI_BMPfile.c" />
+    <ClCompile Include="src\tools\display\GUI\GUI_Paint.c" />
+    <ClCompile Include="src\tools\display\GUI\image.c" />
+    <ClCompile Include="src\tools\display\LCD\LCD_2inch.c" />
     <ClCompile Include="src\tools\util\button.cpp" />
     <ClCompile Include="src\tools\util\Sample.cpp" />
     <ClCompile Include="src\tools\util\stringUtil.cpp" />
     <ClCompile Include="src\tools\util\threads.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Display.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\Options.h" />
+    <ClInclude Include="src\tools\display\Config\Debug.h" />
+    <ClInclude Include="src\tools\display\Config\DEV_Config.h" />
+    <ClInclude Include="src\tools\display\Config\dev_hardware_i2c.h" />
+    <ClInclude Include="src\tools\display\Config\dev_hardware_SPI.h" />
+    <ClInclude Include="src\tools\display\Config\sysfs_gpio.h" />
+    <ClInclude Include="src\tools\display\Fonts\fonts.h" />
+    <ClInclude Include="src\tools\display\GUI\GUI_BMPfile.h" />
+    <ClInclude Include="src\tools\display\GUI\GUI_Paint.h" />
+    <ClInclude Include="src\tools\display\GUI\image.h" />
+    <ClInclude Include="src\tools\display\LCD\LCD_2inch.h" />
     <ClInclude Include="src\tools\include\bcmPWMClockDivisors.h" />
     <ClInclude Include="src\tools\include\button.h" />
     <ClInclude Include="src\tools\include\mcp3008.h" />
@@ -82,7 +109,16 @@
     <ClInclude Include="src\tools\include\stringUtil.h" />
     <ClInclude Include="src\tools\include\threads.h" />
   </ItemGroup>
-  <ItemDefinitionGroup />
+  <ItemGroup>
+    <None Include="src\Makefile" />
+    <None Include="src\tools\display\Fonts\Release_Notes.html" />
+  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(ClCompile.AdditionalIncludeDirectories);src/tools/display/Config;src/tools/display/Fonts;src/tools/display/GUI;src/tools/display/LCD</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USE_WIRINGPI_LIB</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

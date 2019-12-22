@@ -14,8 +14,7 @@
     #include <wiringPiSPI.h>
 #elif USE_DEV_LIB
     #include "sysfs_gpio.h"
-    #include "dev_hardware_SPI.h"
-    
+    #include "dev_hardware_SPI.h"  
 #endif
 
 #include <stdint.h>
@@ -36,6 +35,10 @@
 #define UWORD   uint16_t
 #define UDOUBLE uint32_t
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif  
 
 extern int DEV_RST_PIN;//27
 extern int DEV_DC_PIN;//25
@@ -61,4 +64,10 @@ void DEV_SPI_Init(uint32_t Speed);
 void DEV_SPI_WriteByte(UBYTE Value);
 void DEV_SPI_Write_nByte(uint8_t *pData, uint32_t Len);
 
+#ifdef __cplusplus
+}  // extern "C"
 #endif
+
+
+#endif
+

@@ -46,6 +46,9 @@ public:
 	char *sampleFileName;
 	FILE *sampleFile;
 
+    float sampleScale = 1.0;
+
+
 // methods
 	void usage();
 

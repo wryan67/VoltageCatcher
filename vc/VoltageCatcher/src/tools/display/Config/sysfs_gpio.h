@@ -75,11 +75,21 @@
 // 22PIN + 2PIN UART0 + 2PIN I2C0 + 2PIN I2C
 // + 2PIN 3V3 + 2PIN 5V + 8PIN GND  = 40PIN
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif  
+
+
 
 int SYSFS_GPIO_Export(int Pin);
 int SYSFS_GPIO_Unexport(int Pin);
 int SYSFS_GPIO_Direction(int Pin, int Dir);
 int SYSFS_GPIO_Read(int Pin);
 int SYSFS_GPIO_Write(int Pin, int value);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif

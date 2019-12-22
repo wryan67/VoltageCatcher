@@ -33,27 +33,51 @@ bool setup() {
 
 
 	// spi limit
-	int spiSpeed = 6000000;
+	int spiSpeed = 0;
 
-	if (options.desiredSPSk < 31) {
-		spiSpeed = 2900000;
-	}
+    if (options.refVolts > 4.5) {
+        spiSpeed = 9000000;
 
-	if (options.desiredSPSk < 29) {
-		spiSpeed = 2750000;
-	}
-	if (options.desiredSPSk < 26) {
-		spiSpeed = 2500000;
-	}
-	if (options.desiredSPSk < 23) {
-		spiSpeed = 2300000;
-	}
-	if (options.desiredSPSk < 17) {
-		spiSpeed = 2000000;
-	}
-	if (options.desiredSPSk < 8) {
-		spiSpeed = 1500000;
-	}
+        if (options.desiredSPSk < 29) {
+            spiSpeed = 600000;
+        }
+        if (options.desiredSPSk < 26) {
+            spiSpeed = 5000000;
+        }
+        if (options.desiredSPSk < 23) {
+            spiSpeed = 4600000;
+        }
+        if (options.desiredSPSk < 17) {
+            spiSpeed = 4000000;
+        }
+        if (options.desiredSPSk < 8) {
+            spiSpeed = 3000000;
+        }
+
+    }
+    else {
+        spiSpeed = 6000000;
+
+        if (options.desiredSPSk < 31) {
+            spiSpeed = 2900000;
+        }
+        if (options.desiredSPSk < 29) {
+            spiSpeed = 2750000;
+        }
+        if (options.desiredSPSk < 26) {
+            spiSpeed = 2500000;
+        }
+        if (options.desiredSPSk < 23) {
+            spiSpeed = 2300000;
+        }
+        if (options.desiredSPSk < 17) {
+            spiSpeed = 2000000;
+        }
+        if (options.desiredSPSk < 8) {
+            spiSpeed = 1500000;
+        }
+    }
+
 
 
 	if ((options.spiHandle = wiringPiSPISetup(options.spiChannel, spiSpeed)) < 0)
@@ -240,6 +264,7 @@ void dumpResults() {
 	long sps = 1000000.0 * options.sampleCount / elapsed;
 	printf("sps=%'ld\n", sps);
 
+    displayResults(options, samples);
 	
 	exit(0);
 }

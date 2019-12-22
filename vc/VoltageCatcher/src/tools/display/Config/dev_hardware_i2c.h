@@ -41,6 +41,11 @@
 #define DEV_HARDWARE_I2C_Debug(__info,...)
 #endif
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif  
+
 /**
  * Define I2C attribute
 **/
@@ -58,4 +63,10 @@ void DEV_HARDWARE_I2C_end(void);
 void DEV_HARDWARE_I2C_setSlaveAddress(uint8_t addr);
 uint8_t DEV_HARDWARE_I2C_write(const char * buf, uint32_t len);
 uint8_t DEV_HARDWARE_I2C_read(uint8_t reg, char* buf, uint32_t len);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
+
 #endif

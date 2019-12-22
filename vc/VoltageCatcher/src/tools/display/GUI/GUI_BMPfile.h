@@ -48,6 +48,15 @@
 
 #include "DEV_Config.h"
 
+
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif  
+
+
+
 /*Bitmap file header   14bit*/
 typedef struct BMP_FILE_HEADER {
     UWORD bType;        //File identifier
@@ -84,4 +93,13 @@ typedef struct RGB_QUAD {
 UBYTE GUI_ReadBmp(const char *path, UWORD Xstart, UWORD Ystart);
 UBYTE GUI_ReadBmp_4Gray(const char *path, UWORD Xstart, UWORD Ystart);
 UBYTE GUI_ReadBmp_RGB(const char *path, UWORD Xstart, UWORD Ystart);
+
+
+
+
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif
