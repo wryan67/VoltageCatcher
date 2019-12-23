@@ -20,7 +20,7 @@ DFLAGS   := -c -O2 -D $(USELIB)
 LDFLAGS  := -pthread -lwiringPi -lm -luuid
 SOURCES  := main.cpp Options.cpp Display.cpp
 
-TOOLS    := Sample.cpp stringUtil.cpp
+TOOLS    := Sample.cpp stringUtil.cpp threads.cpp
 TOOLDIR  := tools/util
 
 TDIR     := $(addprefix $(TOOLDIR)/,$(TOOLS))
