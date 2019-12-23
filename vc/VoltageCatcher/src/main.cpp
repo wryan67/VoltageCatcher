@@ -12,6 +12,16 @@ Sample  samples[maxSamples + 1][MCP3008_CHANNELS] = { Sample() };
 int     channels[MCP3008_CHANNELS + 1];
 
 
+Sample  chartData[maxSamples + 1][MCP3008_CHANNELS];
+static bool   triggerMet;
+static float  lastVolts;
+static bool   foundMax;
+static bool   foundMin;
+static float  maxVoltage;
+static float  minVoltage;
+static int    triggerVector;
+
+
 pthread_mutex_t screenLock;
 
 
@@ -269,6 +279,10 @@ void dumpResults() {
     
 	printf("sps=%d\n", options.actualSPS);
 
+
+    digitalWrite(7, HIGH);
+    digitalWrite(8, HIGH);
+    digitalWrite(26, LOW);
     displayResults(options, samples);
 	
 	exit(0);
@@ -510,42 +524,191 @@ void frame(long frame) {
     free(BlackImage);
 }
 
+
+
+
+void resetTrigger(float volts) {
+    triggerMet = false;
+    lastVolts = volts;
+
+    foundMax = false;
+    foundMin = false;
+
+    maxVoltage = options.triggerVoltage * 1.1;
+    minVoltage = options.triggerVoltage * 0.9;
+
+    triggerVector = options.triggerVector;
+}
+
+bool checkTriggerZeta(float volts) {
+    if (triggerMet) return triggerMet;
+
+    float vector = volts - lastVolts;
+    lastVolts = volts;
+
+    if (vector == 0) {
+        return false;
+    }
+
+    if (triggerVector > 0) {  // trigger on the rise
+        if (!foundMax) {
+            if (volts >= maxVoltage) {
+                foundMax = true;
+            }
+            return false;
+        }
+        if (!foundMin) {
+            if (volts <= minVoltage) {
+                foundMin = true;
+            }
+            return false;
+        }
+
+        if (vector < 0) {    // is falling
+            return false;
+        }
+        else {
+            if (volts >= options.triggerVoltage) {
+                triggerMet = true;
+                return true;
+            }
+        }
+
+    }
+    else {  // trigger on the fall
+        if (!foundMin) {
+            if (volts > minVoltage) {
+                return false;
+            }
+            foundMin = true;
+            return false;
+        }
+        if (!foundMax) {
+            if (volts < maxVoltage) {
+                return false;
+            }
+            foundMax = true;
+        }
+
+        if (vector > 0) {   // is rising
+            return false;
+        }
+        else {
+            if (volts <= options.triggerVoltage) {
+                triggerMet = true;
+                return true;
+            }
+        }
+    }
+
+
+    return triggerMet;
+}
+
+
+void displayChart(float currVoltage, int count) {
+
+    pthread_mutex_lock(&screenLock);
+
+    close(options.spiHandle);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, 32000000);
+    digitalWrite(7, HIGH);
+    digitalWrite(8, HIGH);
+    digitalWrite(26, LOW);
+    
+    //frame(count);
+
+    fprintf(stderr, "frame %d currVoltage=%f sample[0]=", count, currVoltage); 
+    for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
+        Sample *s = &chartData[1][channelIndex];
+        fprintf(stderr, "%f,", s->volts);
+    }
+    fprintf(stderr, "\n");
+
+    displayResults(options, chartData);
+
+
+    close(options.spiHandle);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
+    digitalWrite(7, LOW);
+    digitalWrite(8, LOW);
+    digitalWrite(26, HIGH);
+
+    pthread_mutex_unlock(&screenLock);
+}
+
+
 void* zetaRead(void*) {
     options.zetaInput = fopen(options.zetaFileName, "r");
 
     char buf[8192];
+    bool firstVoltage = true;
+    int frameCount = 0;
+    int zetaCount = 0;
 
     while (fgets(buf, sizeof(buf), options.zetaInput)) {
+
         //fprintf(stderr, "%s", buf);
         char *c1 = strstr(buf, ",");
-        char sample[32];
-        strncpy(sample, buf, c1 - buf);
 
-        long n;
-        sscanf(sample, "%ld", &n);
-        if (n % 100 == 0) {
-            fprintf(stderr, "sample %ld\n",n);
+        struct headerStruct {
+            char sample[32];
+            char timestamp[32];
+        } header;
+        
+        char channelVoltages[MCP3008_CHANNELS][32];
 
-            pthread_mutex_lock(&screenLock);
-
-            close(options.spiHandle);
-            options.spiHandle = wiringPiSPISetup(options.spiChannel, 32000000);
-
-            digitalWrite(7, HIGH);
-            digitalWrite(8, HIGH);
-            digitalWrite(26, LOW);
-
-            
-            frame(n);
-            close(options.spiHandle);
-            options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
-
-            digitalWrite(7, LOW);
-            digitalWrite(8, LOW);
-            digitalWrite(26, HIGH);
-
-            pthread_mutex_unlock(&screenLock);
+        splitField zetaFields[12] = {
+          {header.sample,    sizeof(header.sample)},
+          {header.timestamp, sizeof(header.timestamp)}
+        };
+        
+        int channelIndex = 0;
+        for (channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
+            zetaFields[2+channelIndex] = { channelVoltages[channelIndex], sizeof(channelVoltages[channelIndex]) };
         }
+
+        int ct = strsplit(zetaFields, 3+channelIndex, buf, ",", ignoreSplitSoftError);
+        
+        float currVoltage;
+        sscanf(channelVoltages[0], "%f", &currVoltage);
+
+        if (firstVoltage) {
+            resetTrigger(currVoltage);
+            firstVoltage = false;
+        }
+
+        if (!checkTriggerZeta(currVoltage)) {
+            continue;
+        }
+
+        
+        Sample* s = &chartData[zetaCount][0];
+        s->channel = channels[channelIndex];
+        s->volts = currVoltage;
+
+        
+
+        for (channelIndex = 1; channels[channelIndex] >= 0; ++channelIndex) {
+            float v;
+            sscanf(channelVoltages[channelIndex], "%f", &v);
+
+            Sample* s = &chartData[zetaCount][channelIndex];
+            s->channel = channels[channelIndex];
+            s->volts = v;
+        }
+
+        int maxX = LCD_HEIGHT * options.sampleScale;
+        int end = (maxX > options.sampleCount) ? options.sampleCount : maxX;
+
+        if (++zetaCount % options.sampleCount == 0) {           
+            displayChart(currVoltage, frameCount++);
+
+            zetaCount = 0;
+            resetTrigger(currVoltage);
+            continue;
+        }
+
 
     }
     printf("zetaRead-ends\n"); fflush(stdout);

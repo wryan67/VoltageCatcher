@@ -22,6 +22,7 @@
 // project specific
 #include "Options.h"
 #include "./tools/include/threads.h"
+#include "./tools/include/stringUtil.h"
 
 // spi display
 #include "Display.h"

@@ -23,23 +23,21 @@ void arcPoint(int x, int y, int radius, double degree, int* xPoint, int* yPoint)
 
 void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS]) {
 
-    printf("lcd display init\n"); fflush(stdout);
     //signal(SIGINT, Handler);
 
 
     //DEV_ModuleInit();
-    DEV_SPI_Init(90000000);
+   // DEV_SPI_Init(90000000);
 
-    digitalWrite(7, HIGH);
-    digitalWrite(8, HIGH);
-    digitalWrite(26, LOW);
+   // digitalWrite(7, HIGH);
+   // digitalWrite(8, HIGH);
+   // digitalWrite(26, LOW);
 //    LCD_Reset();
 //    LCD_Init();
-    LCD_Clear(BLACK);
+    //LCD_Clear(BLACK);
 
     UBYTE* BlackImage;
     UDOUBLE Imagesize = LCD_WIDTH * LCD_HEIGHT * 2;
-    printf("Imagesize = %ld\r\n", Imagesize);
     if ((BlackImage = (UBYTE*)malloc(Imagesize)) == NULL) {
         printf("Failed to allocate memory for black image...\r\n");
         exit(0);
@@ -114,10 +112,11 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
 
     LCD_Display(BlackImage);
 
-    printf("lcd display paint\n"); fflush(stdout);
+    free(BlackImage);
+  //  printf("lcd display paint\n"); fflush(stdout);
 
-    printf("lcd close\n"); fflush(stdout);
+//printf("lcd close\n"); fflush(stdout);
 
-    DEV_ModuleExit();
+//DEV_ModuleExit();
     return;
 }

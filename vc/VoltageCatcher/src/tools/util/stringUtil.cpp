@@ -97,3 +97,65 @@ void printStringArray(char **parts) {
 }
 
 
+
+int strsplit(splitField* fields, int expected, const char* input, const char* fieldSeparator, void (*softError)(int fieldNumber, int expected, int actual)) {
+    int i;
+    int fieldSeparatorLen = strlen(fieldSeparator);
+    const char* tNext, * tLast = input;
+
+    for (i = 0; i < expected && (tNext = strstr(tLast, fieldSeparator)) != NULL; ++i) {
+        unsigned int len = tNext - tLast;
+        if (len >= fields[i].maxLength) {
+            softError(i, fields[i].maxLength - 1, len);
+            len = fields[i].maxLength - 1;
+        }
+        fields[i].field[len] = 0;
+        strncpy(fields[i].field, tLast, len);
+        tLast = tNext + fieldSeparatorLen;
+    }
+    if (i < expected) {
+        if (strlen(tLast) > fields[i].maxLength) {
+            softError(i, fields[i].maxLength, strlen(tLast));
+        }
+        else {
+            strcpy(fields[i].field, tLast);
+        }
+        return i + 1;
+    }
+    else {
+        return i;
+    }
+}
+
+void ignoreSplitSoftError(int fieldNumber, int expected, int actual) {
+}
+
+
+int strsplit(const char* input, int expected, const char* fieldSeparator, ...) {
+    va_list args;
+    va_start(args, fieldSeparator);
+
+    const char* last = input;
+    const char* next;
+
+    int ct = 0;
+    while (ct < expected && (next = strstr(last, fieldSeparator)) != NULL) {
+        char* target = va_arg(args, char*);
+        if (target != NULL) {
+            strncpy(target, last, next - last);
+            target[next - last] = 0;
+            ++ct;
+        }
+        last = next + 2;
+    }
+    if (ct < expected) {
+        char* target = va_arg(args, char*);
+        if (target != NULL) {
+            strcpy(target, last);
+        }
+    }
+
+    va_end(args);
+    return ct + 1;
+}
+
