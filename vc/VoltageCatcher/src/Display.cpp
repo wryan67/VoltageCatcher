@@ -21,18 +21,22 @@ void arcPoint(int x, int y, int radius, double degree, int* xPoint, int* yPoint)
     *yPoint = iy;
 }
 
+int imageSize = LCD_WIDTH * LCD_HEIGHT * 2;
+
 void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps) {
 
     signal(SIGINT, Handler);
+    UBYTE* localImage = NULL;
 
-    UBYTE* BlackImage;
-    UDOUBLE Imagesize = LCD_WIDTH * LCD_HEIGHT * 2;
-    if ((BlackImage = (UBYTE*)malloc(Imagesize)) == NULL) {
+    localImage = (UBYTE*)malloc(imageSize);
+
+
+    if (localImage == NULL) {
         printf("Failed to allocate memory for black image...\r\n");
         exit(0);
     }
 
-    Paint_NewImage(BlackImage, LCD_WIDTH, LCD_HEIGHT, 0, WHITE);
+    Paint_NewImage(localImage, LCD_WIDTH, LCD_HEIGHT, 0, BLACK);
     Paint_Clear(BLACK);
     Paint_SetRotate(270);
 
@@ -103,13 +107,47 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
         Paint_DrawString_EN(maxX - (17 * strlen(message)), 24 * (channelIndex + 2), message, &Font24, BLACK, lineColor[channels[channelIndex]]);
     }
 
-    LCD_Display(BlackImage);
+    long long now = currentTimeMillis();
+    long long elapsed = now - options.captureMessage;
+    if (elapsed < 6000) {
+        sprintf(message, "Data Saved");
+        Paint_DrawString_EN(maxX/2 - (17 * strlen(message)/2), maxY/2 - 12, message, &Font24, BLACK, WHITE);
+    }
 
-    free(BlackImage);
-  //  printf("lcd display paint\n"); fflush(stdout);
+    //memcpy(chartImage, localImage, imageSize);
+
+    LCD_Display(localImage);
+
+    free(localImage);
 
 //printf("lcd close\n"); fflush(stdout);
 
 //DEV_ModuleExit();
     return;
+}
+
+
+void displayCapturing() {
+    int maxX = LCD_HEIGHT;
+    int maxY = LCD_WIDTH;
+    int midY = LCD_WIDTH / 2;
+
+    UBYTE* chartImage = (UBYTE*)malloc(imageSize);
+
+    if (chartImage == NULL) {
+        printf("Failed to allocate memory for black image...\r\n");
+        exit(0);
+    }
+
+    Paint_NewImage(chartImage, LCD_WIDTH, LCD_HEIGHT, 0, BLACK);
+    Paint_Clear(BLACK);
+    Paint_SetRotate(270);
+
+    char message[32];
+    sprintf(message, "Capturing Data");
+    Paint_DrawString_EN(maxX / 2 - (17 * strlen(message) / 2), maxY / 2 - 12, message, &Font24, BLACK, WHITE);
+
+    LCD_Display(chartImage);
+
+    free(chartImage);
 }

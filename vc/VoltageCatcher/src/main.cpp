@@ -23,6 +23,7 @@ static float  minVoltage;
 
 pthread_mutex_t screenLock;
 int zetaCount = 0;
+bool dataCaptureActive = false;
 
 
 
@@ -175,7 +176,12 @@ void dumpResults() {
 	double minVolt = 999999;
 	double maxVolt = 0;
 
-	
+    options.sampleFile = fopen(options.sampleFileName, "w");
+    if (options.sampleFile == NULL) {
+        fprintf(stderr, "cannot open output file '%s': %s\n", options.sampleFileName, strerror(errno));
+        exit(2);
+    }
+
 
 	if (!options.suppressHeaders) {
 
@@ -257,6 +263,9 @@ void dumpResults() {
 		fprintf(options.sampleFile, "\n");
 	}
 	fclose(options.sampleFile);
+    printf("data saved...\n");
+    
+
 
 	avgElapsed = (double)sumElapsed / options.sampleCount;
 	avgDelta   = (double)sumDelta   / options.sampleCount;
@@ -280,12 +289,13 @@ void dumpResults() {
 	printf("sps=%d\n", options.actualSPS);
 
 
-    digitalWrite(10, HIGH);
-    digitalWrite(11, HIGH);
-    digitalWrite(26, LOW);
-    displayResults(options, samples,0);
-	
-	exit(0);
+    if (!options.zetaMode) {
+        digitalWrite(10, HIGH);
+        digitalWrite(11, HIGH);
+        digitalWrite(26, LOW);
+        displayResults(options, samples, 0);
+        exit(0);
+    }
 }
 
 
@@ -403,6 +413,41 @@ struct zetaStruct {
     float channelVolts[8];
 };
 
+long long lastSave;
+
+void displayCapturingLock();
+
+void dataCapture();
+void dataCaputreActivation(void) {
+    piLock(3);
+    long long now = currentTimeMillis();
+    long elapsed = now - lastSave;
+    if (elapsed < 1000 || dataCaptureActive) {
+        piUnlock(3);
+        return;
+    }
+    dataCaptureActive = true;
+    printf("data capture begins...\n");
+
+    options.sampelingActive = false;
+    options.daemon = false;
+    displayCapturingLock();
+
+    dataCapture();
+
+    while (options.sampelingActive) {
+        delay(10);
+    }
+
+    printf("end capture detected\n");
+    options.captureMessage = currentTimeMillis();
+    options.daemon = true;
+    options.sampelingActive = true;
+    lastSave = now;
+    dataCaptureActive = false;
+    piUnlock(3);
+}
+
 void takeSampleActivation(void) {
 	piLock(1);
 
@@ -436,10 +481,6 @@ void takeSampleActivation(void) {
             }
             daemonSample++;
 
-			if (options.sampleIndex == 0) {
-				++options.sampleIndex;
-			}
-
 
 			piUnlock(1);
 			return;
@@ -468,6 +509,7 @@ void takeSampleActivation(void) {
 		if (++options.sampleIndex >= options.sampleCount) {
 			options.sampelingActive = false;
 			dumpResults();
+            options.sampleIndex = 0;
 		}
 	}
 	piUnlock(1);
@@ -646,6 +688,31 @@ void displayChart(int fps) {
     pthread_mutex_unlock(&screenLock);
 }
 
+void displayCapturingLock() {
+
+    pthread_mutex_lock(&screenLock);
+
+    close(options.spiHandle);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, 90000000);
+    digitalWrite(10, HIGH);
+    digitalWrite(11, HIGH);
+    digitalWrite(26, LOW);
+
+    for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
+        Sample* s = &chartData[1][channelIndex];
+    }
+
+    displayCapturing();
+
+    close(options.spiHandle);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
+    digitalWrite(10, LOW);
+    digitalWrite(11, LOW);
+    digitalWrite(26, HIGH);
+
+    pthread_mutex_unlock(&screenLock);
+}
+
 
 void* zetaRead(void*) {
     bool firstVoltage = true;
@@ -745,6 +812,93 @@ void setupZeta() {
 
 }
 
+void dataCapture() {
+    float vector = 0;
+    float volts = getVolts(readChannel(channels[0]));
+
+    float max = 0;
+    float min = 999999;
+
+    for (int i = 0; i < options.sampleCount; ++i) {
+        delayMicroseconds(10);
+        volts = getVolts(readChannel(channels[0]));
+        if (volts > max) max = volts;
+        if (volts < min) min = volts;
+    }
+
+    max *= .9;
+    min *= 1.1;
+
+    if (options.debugLevel) {
+        printf("trigger max=%f\n", max);
+        printf("trigger min=%f\n", min);
+    }
+    fflush(stdout);
+    fflush(stderr);
+
+    if (options.triggerVoltage > 0) {
+        if (max < options.triggerVoltage) {
+            fprintf(stderr, "variant voltage is lower than specified trigger, max=%f\n", max);
+            exit(0);
+        }
+
+        if (min > options.triggerVoltage) {
+            fprintf(stderr, "variant voltage is higher than specified trigger, min=%f\n", min);
+            exit(0);
+        }
+    }
+
+
+    if (min > max) {
+        fprintf(stderr, "Not enough voltage variance to detect cycle\n");
+        exit(0);
+    }
+    volts = getVolts(readChannel(channels[0]));
+    if (options.debugLevel) printf("starting volts:     %f\n", volts);
+
+    // wait for mid-cycle
+    for (int i = 0; i < options.sampleCount; ++i) {
+        delayMicroseconds(10);
+        volts = getVolts(readChannel(channels[0]));
+
+        if (options.triggerVector > 0) {
+            if (volts > min) {
+                break;
+            }
+        }
+        else {
+            if (volts < max) {
+                break;
+            }
+        }
+    }
+    if (options.debugLevel) printf("pre-cycle:          %f\n", volts);
+
+
+    // wait for cycle
+    for (int i = 0; i < options.sampleCount; ++i) {
+        delayMicroseconds(10);
+        volts = getVolts(readChannel(channels[0]));
+
+        if (options.triggerVector > 0) {
+            if (volts < min) {
+                break;
+            }
+        }
+        else {
+            if (volts > max) {
+                break;
+            }
+        }
+    }
+
+    if (options.debugLevel) printf("cycle start:        %f\n", volts);
+
+    printf("taking samples...\n");
+    options.lastVolts = volts;
+    options.sampelingActive = true;
+}
+
 int main(int argc, char **argv)
 {
 	if (setuid(0) != 0) {
@@ -789,14 +943,14 @@ int main(int argc, char **argv)
 
     if (options.zetaMode) {
         setupZeta();
+
+        if (wiringPiISR(DataCapturePin, INT_EDGE_RISING, &dataCaputreActivation) < 0) {
+            fprintf(stderr, "Unable to setup ISR: %s\n", strerror(errno));
+            return 1;
+        }
     }
 
 
-    options.sampleFile = fopen(options.sampleFileName, "w");
-    if (options.sampleFile == NULL) {
-        fprintf(stderr, "cannot open output file '%s': %s\n", options.sampleFileName, strerror(errno));
-        exit(2);
-    }
 
 
 	printf("setup event triggers\n");
@@ -814,117 +968,35 @@ int main(int argc, char **argv)
 	}
 
 
- 
+    if (!options.zetaMode) {
 
-    printf("priming...\n"); fflush(stdout);
+        printf("priming...\n"); fflush(stdout);
 
-	int primeCount = 150000;
+        int primeCount = 150000;
 
-	if (options.desiredSPSk < 30) {
-		primeCount = 80000;
-	}
-	if (options.desiredSPSk < 25) {
-		primeCount = 40000;
-	}
-	if (options.desiredSPSk < 15) {
-		primeCount = 20000;
-	}
-	if (options.desiredSPSk < 10) {
-		primeCount=5000;
-	}
-	if (options.desiredSPSk < 5) {
-		primeCount = 25000;
-	}
+        if (options.desiredSPSk < 30) {
+            primeCount = 80000;
+        }
+        if (options.desiredSPSk < 25) {
+            primeCount = 40000;
+        }
+        if (options.desiredSPSk < 15) {
+            primeCount = 20000;
+        }
+        if (options.desiredSPSk < 10) {
+            primeCount = 5000;
+        }
+        if (options.desiredSPSk < 5) {
+            primeCount = 25000;
+        }
 
-	for (int i = 0; i < primeCount; ++i) {
-		readChannel(channels[0]);
-	}
-
-
-
-	float vector   = 0;
-	float volts     = getVolts(readChannel(channels[0]));
-
-	float max = 0;
-	float min = 999999;
-
-	for (int i = 0;i <options.sampleCount; ++i) {
-		delayMicroseconds(10);
-		volts = getVolts(readChannel(channels[0]));
-		if (volts > max) max = volts;
-		if (volts < min) min = volts;
-	}
-
-	max *= .9;
-	min *= 1.1;
-
-	if (options.debugLevel) {
-		printf("trigger max=%f\n",max);
-		printf("trigger min=%f\n",min);
-	}
-	fflush(stdout);
-	fflush(stderr);
-
-	if (options.triggerVoltage > 0) {
-		if (max < options.triggerVoltage) {
-			fprintf(stderr, "variant voltage is lower than specified trigger, max=%f\n",max);
-			exit(0);
-		}
-
-		if (min > options.triggerVoltage) {
-			fprintf(stderr, "variant voltage is higher than specified trigger, min=%f\n", min);
-			exit(0);
-		}
-	}
+        for (int i = 0; i < primeCount; ++i) {
+            readChannel(channels[0]);
+        }
+    }
 
 
-	if (min>max) {
-		fprintf(stderr, "Not enough voltage variance to detect cycle\n");
-		exit(0);
-	}
-	volts = getVolts(readChannel(channels[0]));
-	if (options.debugLevel) printf("starting volts:     %f\n", volts);
-
-	// wait for mid-cycle
-	for (int i = 0; i < options.sampleCount; ++i) {
-		delayMicroseconds(10);
-		volts = getVolts(readChannel(channels[0]));
-
-		if (options.triggerVector > 0) {
-			if (volts > min) {
-				break;
-			}
-		} else {
-			if (volts < max) {
-				break;
-			}
-		}
-	}
-	if (options.debugLevel) printf("pre-cycle:          %f\n", volts);
-
-
-	// wait for cycle
-	for (int i = 0; i < options.sampleCount; ++i) {
-		delayMicroseconds(10);
-		volts = getVolts(readChannel(channels[0]));
-
-		if (options.triggerVector > 0) {
-			if (volts < min) {
-				break;
-			}
-		}
-		else {
-			if (volts > max) {
-				break;
-			}
-		}
-	}
-
-	if (options.debugLevel) printf("cycle start:        %f\n", volts);
-
-	printf("taking samples...\n");
-	options.lastVolts = volts;
-	options.sampelingActive = true;
+    dataCapture();
 
 	while (true) {
 		fflush(stdout);

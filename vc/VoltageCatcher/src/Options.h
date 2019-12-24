@@ -52,6 +52,8 @@ public:
     int  actualSPS;
     float sampleScale = 1.0;
 
+    long long captureMessage = 0;
+
     int zetaPipes[2];
 
 // methods
@@ -63,3 +65,4 @@ public:
 
 };
 
+extern Options options;

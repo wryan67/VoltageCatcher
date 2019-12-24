@@ -35,7 +35,7 @@ using namespace std::chrono;
 // GPIO Pins
 #define ClockOutPin 1
 #define ClockInPin  4
-
+#define DataCapturePin 27
 
 
 // sps is in kHz
