@@ -673,6 +673,9 @@ void* zetaRead(void*) {
         if (!checkTriggerZeta(zeta.channelVolts[0])) {
             continue;
         }
+        if (zetaCount == 0) {
+            beginSampleTime = std::chrono::system_clock::now();
+        }
 
         int channelIndex=0;
         
@@ -716,7 +719,6 @@ void* zetaRead(void*) {
 
             displayChart(lastFPS);
 
-            beginSampleTime = std::chrono::system_clock::now();
 
             zetaCount = 0;
             resetTrigger(zeta.channelVolts[0]);
