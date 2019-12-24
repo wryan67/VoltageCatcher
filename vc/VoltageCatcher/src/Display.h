@@ -12,5 +12,5 @@
 #include "image.h"
 
 
-void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS]);
+void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps);
 

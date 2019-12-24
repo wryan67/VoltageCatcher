@@ -21,7 +21,7 @@ void arcPoint(int x, int y, int radius, double degree, int* xPoint, int* yPoint)
     *yPoint = iy;
 }
 
-void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS]) {
+void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps) {
 
     signal(SIGINT, Handler);
 
@@ -109,6 +109,10 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
         Paint_DrawString_EN(maxX - (17 * strlen(message)), 24 * (channelIndex + 2), message, &Font24, BLACK, lineColor[channels[channelIndex]]);
     }
 
+    if (fps > 0) {
+        sprintf(message, "%d-fps", fps);
+        Paint_DrawString_EN(maxX - (17 * strlen(message)), maxY - 26, message, &Font24, BLACK, LIGHTBLUE);
+    }
 
     LCD_Display(BlackImage);
 
