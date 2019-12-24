@@ -22,6 +22,7 @@ static float  minVoltage;
 
 
 pthread_mutex_t screenLock;
+int zetaCount = 0;
 
 
 
@@ -652,16 +653,18 @@ void* zetaRead(void*) {
 
     bool firstVoltage = true;
     int frameCount = 0;
-    int zetaCount = 0;
     int lastFPS=0;
     int fps=0;
-    long long second = currentTimeMillis() / 1000;
-    long long lastSecond = second;
+    auto beginSampleTime = std::chrono::system_clock::now();
+
+    auto second = duration_cast<seconds>(beginSampleTime.time_since_epoch());
+    auto lastSecond = second;
 
     struct zetaStruct zeta;
 
 
     while (fread(&zeta, sizeof(zeta), 1, options.zetaInput)) {
+
         if (firstVoltage) {
             resetTrigger(zeta.channelVolts[0]);
             firstVoltage = false;
@@ -677,6 +680,7 @@ void* zetaRead(void*) {
         s->channel = channels[channelIndex];
         s->volts = zeta.channelVolts[0];
 
+        
 
         for (channelIndex = 1; channels[channelIndex] >= 0; ++channelIndex) {
             Sample* s = &chartData[zetaCount][channelIndex];
@@ -688,18 +692,35 @@ void* zetaRead(void*) {
         int end = (maxX > options.sampleCount) ? options.sampleCount : maxX;
 
         if (++zetaCount % (int)(options.sampleScale * LCD_HEIGHT) == 0) {
-            second = currentTimeMillis()/1000;
+            auto now = std::chrono::system_clock::now();
+            auto second = duration_cast<seconds>(now.time_since_epoch());
+
             ++fps;
             if (lastSecond != second) {
                 lastFPS = fps;
                 lastSecond = second;
                 fps = 0;
             }
+
+            auto p2 = std::chrono::system_clock::now();
+            auto start = duration_cast<microseconds>(beginSampleTime.time_since_epoch());
+            auto end   = duration_cast<microseconds>(p2.time_since_epoch());
+
+            long elapsed = end.count() - start.count();
+
+
+           // fprintf(stderr, "frame=%d, count=%d, elapsed=%ld \n", ++frameCount, zetaCount, elapsed);
+
+            options.actualSPS = 1000000.0 * zetaCount / elapsed;
+
+
             displayChart(lastFPS);
+
+            beginSampleTime = std::chrono::system_clock::now();
 
             zetaCount = 0;
             resetTrigger(zeta.channelVolts[0]);
-            delay(10);
+            //delay(10);
             continue;
         }
         
