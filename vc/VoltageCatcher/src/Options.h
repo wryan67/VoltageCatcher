@@ -52,9 +52,7 @@ public:
     int  actualSPS;
     float sampleScale = 1.0;
 
-    char zetaFileName[128];
-    FILE *zetaInput;
-    FILE* zetaOutput;
+    int zetaPipes[2];
 
 // methods
 	void usage();

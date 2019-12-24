@@ -135,7 +135,6 @@ bool Options::commandLineOptions(int argc, char **argv) {
         case 'z':
             daemon = true;
             zetaMode = true;         
-            sprintf(zetaFileName, "/tmp/.vc.internal.%s", getGUID());
 
             break;
 

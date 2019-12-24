@@ -387,7 +387,7 @@ bool checkTrigger(float volts) {
 void breakOut(int out) {
 	if (out < 1) {
         if (options.zetaMode) {
-            fclose(options.zetaOutput);
+            close(options.zetaPipes[0]);
         } else {
             fclose(options.sampleFile);
         }
@@ -423,7 +423,7 @@ void takeSampleActivation(void) {
                 for (int i = 0; channels[i] >= 0; ++i) {
                     zeta.channelVolts[i]=samples[options.sampleIndex][channels[i]].volts;
                 }
-                fwrite(&zeta, sizeof(zeta), 1, options.zetaOutput);
+                write(options.zetaPipes[1], &zeta, sizeof(zeta));
             }
             else {
                 breakOut(fprintf(options.sampleFile, "%lld,%lld", daemonSample, timestamp));
@@ -638,23 +638,21 @@ void displayChart(int fps) {
     displayResults(options, chartData, fps);
 
 
-    close(options.spiHandle);
-    options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
-    digitalWrite(10, LOW);
-    digitalWrite(11, LOW);
-    digitalWrite(26, HIGH);
+close(options.spiHandle);
+options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
+digitalWrite(10, LOW);
+digitalWrite(11, LOW);
+digitalWrite(26, HIGH);
 
-    pthread_mutex_unlock(&screenLock);
+pthread_mutex_unlock(&screenLock);
 }
 
 
 void* zetaRead(void*) {
-    options.zetaInput = fopen(options.zetaFileName, "r");
-
     bool firstVoltage = true;
     int frameCount = 0;
-    int lastFPS=0;
-    int fps=0;
+    int lastFPS = 0;
+    int fps = 0;
     auto beginSampleTime = std::chrono::system_clock::now();
 
     auto second = duration_cast<seconds>(beginSampleTime.time_since_epoch());
@@ -663,7 +661,7 @@ void* zetaRead(void*) {
     struct zetaStruct zeta;
 
 
-    while (fread(&zeta, sizeof(zeta), 1, options.zetaInput)) {
+    while (read(options.zetaPipes[0], &zeta, sizeof(zeta))) {
 
         if (firstVoltage) {
             resetTrigger(zeta.channelVolts[0]);
@@ -677,13 +675,13 @@ void* zetaRead(void*) {
             beginSampleTime = std::chrono::system_clock::now();
         }
 
-        int channelIndex=0;
-        
+        int channelIndex = 0;
+
         Sample* s = &chartData[zetaCount][0];
         s->channel = channels[channelIndex];
         s->volts = zeta.channelVolts[0];
 
-        
+
 
         for (channelIndex = 1; channels[channelIndex] >= 0; ++channelIndex) {
             Sample* s = &chartData[zetaCount][channelIndex];
@@ -707,12 +705,12 @@ void* zetaRead(void*) {
 
             auto p2 = std::chrono::system_clock::now();
             auto start = duration_cast<microseconds>(beginSampleTime.time_since_epoch());
-            auto end   = duration_cast<microseconds>(p2.time_since_epoch());
+            auto end = duration_cast<microseconds>(p2.time_since_epoch());
 
             long elapsed = end.count() - start.count();
 
 
-           // fprintf(stderr, "frame=%d, count=%d, elapsed=%ld \n", ++frameCount, zetaCount, elapsed);
+            // fprintf(stderr, "frame=%d, count=%d, elapsed=%ld \n", ++frameCount, zetaCount, elapsed);
 
             options.actualSPS = 1000000.0 * zetaCount / elapsed;
 
@@ -725,7 +723,7 @@ void* zetaRead(void*) {
             //delay(10);
             continue;
         }
-        
+
     }
 
     printf("zetaRead-ends\n"); fflush(stdout);
@@ -733,18 +731,19 @@ void* zetaRead(void*) {
 }
 
 void setupZeta() {
-    char cmd[128];
-    sprintf(cmd, "mknod %s p", options.zetaFileName);
-    system(cmd);
-
     if (pthread_mutex_init(&screenLock, NULL) != 0) {
         printf("\n mutex init has failed\n");
         exit(9);
     }
 
+    if (pipe(options.zetaPipes) < 0) {
+        fprintf(stderr, "open zeta pipes failed\n");
+        exit(2);
+    }
+
     pthread_t zetaReadId = threadCreate(zetaRead, "zetaRead");
 
-    options.zetaOutput = fopen(options.zetaFileName, "w");
+
 }
 
 int main(int argc, char **argv)
