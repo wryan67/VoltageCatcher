@@ -25,17 +25,6 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
 
     signal(SIGINT, Handler);
 
-
-    //DEV_ModuleInit();
-   // DEV_SPI_Init(90000000);
-
-   // digitalWrite(7, HIGH);
-   // digitalWrite(8, HIGH);
-   // digitalWrite(26, LOW);
-//    LCD_Reset();
-//    LCD_Init();
-    //LCD_Clear(BLACK);
-
     UBYTE* BlackImage;
     UDOUBLE Imagesize = LCD_WIDTH * LCD_HEIGHT * 2;
     if ((BlackImage = (UBYTE*)malloc(Imagesize)) == NULL) {
@@ -77,6 +66,11 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
     sprintf(message, "%4.2f", options.refVolts);
     Paint_DrawString_EN(1, 1, message, &Font24, BLACK, LGRAY);
 
+    if (fps > 0) {
+        sprintf(message, "%d-fps", fps);
+        Paint_DrawString_EN(maxX - (17 * strlen(message)), maxY - 26, message, &Font24, BLACK, LIGHTBLUE);
+    }
+
 
     Sample s;
     int ly[MCP3008_CHANNELS + 1];
@@ -107,11 +101,6 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
     for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
         sprintf(message, "%d", channels[channelIndex]);
         Paint_DrawString_EN(maxX - (17 * strlen(message)), 24 * (channelIndex + 2), message, &Font24, BLACK, lineColor[channels[channelIndex]]);
-    }
-
-    if (fps > 0) {
-        sprintf(message, "%d-fps", fps);
-        Paint_DrawString_EN(maxX - (17 * strlen(message)), maxY - 26, message, &Font24, BLACK, LIGHTBLUE);
     }
 
     LCD_Display(BlackImage);

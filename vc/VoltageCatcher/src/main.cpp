@@ -637,14 +637,13 @@ void displayChart(int fps) {
 
     displayResults(options, chartData, fps);
 
+    close(options.spiHandle);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
+    digitalWrite(10, LOW);
+    digitalWrite(11, LOW);
+    digitalWrite(26, HIGH);
 
-close(options.spiHandle);
-options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
-digitalWrite(10, LOW);
-digitalWrite(11, LOW);
-digitalWrite(26, HIGH);
-
-pthread_mutex_unlock(&screenLock);
+    pthread_mutex_unlock(&screenLock);
 }
 
 
