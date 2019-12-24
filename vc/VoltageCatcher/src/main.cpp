@@ -5,7 +5,6 @@
 
 
 #include "main.h"
-#include "DEV_Config.h"
 
 Options options = Options();
 Sample  samples[maxSamples + 1][MCP3008_CHANNELS] = { Sample() };
@@ -280,8 +279,8 @@ void dumpResults() {
 	printf("sps=%d\n", options.actualSPS);
 
 
-    digitalWrite(7, HIGH);
-    digitalWrite(8, HIGH);
+    digitalWrite(10, HIGH);
+    digitalWrite(11, HIGH);
     digitalWrite(26, LOW);
     displayResults(options, samples);
 	
@@ -611,9 +610,9 @@ void displayChart(float currVoltage, int count) {
     pthread_mutex_lock(&screenLock);
 
     close(options.spiHandle);
-    options.spiHandle = wiringPiSPISetup(options.spiChannel, 32000000);
-    digitalWrite(7, HIGH);
-    digitalWrite(8, HIGH);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, 90000000);
+    digitalWrite(10, HIGH);
+    digitalWrite(11, HIGH);
     digitalWrite(26, LOW);
     
     //frame(count);
@@ -630,8 +629,8 @@ void displayChart(float currVoltage, int count) {
 
     close(options.spiHandle);
     options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
-    digitalWrite(7, LOW);
-    digitalWrite(8, LOW);
+    digitalWrite(10, LOW);
+    digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
 
     pthread_mutex_unlock(&screenLock);
@@ -755,22 +754,22 @@ int main(int argc, char **argv)
     
     GPIO_Config();
 
-    pinMode(7,  OUTPUT);
-    pinMode(8,  OUTPUT);
+    pinMode(10, OUTPUT);
+    pinMode(11, OUTPUT);
     pinMode(26, OUTPUT);
-    digitalWrite(7, HIGH);
-    digitalWrite(8, HIGH);
+
+    digitalWrite(10, HIGH);
+    digitalWrite(11, HIGH);
     digitalWrite(26, LOW);
+
     LCD_Init();
     LCD_Clear(BLACK);
 
-    digitalWrite(7, LOW);
-    digitalWrite(8, LOW);
+    digitalWrite(10, LOW);
+    digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
 
 
-    pinMode(26, OUTPUT);
-    digitalWrite(26, HIGH);
 
     if (options.zetaMode) {
         setupZeta();

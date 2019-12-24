@@ -23,7 +23,7 @@ void arcPoint(int x, int y, int radius, double degree, int* xPoint, int* yPoint)
 
 void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS]) {
 
-    //signal(SIGINT, Handler);
+    signal(SIGINT, Handler);
 
 
     //DEV_ModuleInit();

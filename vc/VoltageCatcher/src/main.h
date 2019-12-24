@@ -26,6 +26,7 @@
 
 // spi display
 #include "Display.h"
+#include "DEV_Config.h"
 
 using namespace std;
 using namespace std::chrono;
