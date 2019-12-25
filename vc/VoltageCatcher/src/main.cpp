@@ -285,7 +285,8 @@ void dumpResults() {
 	}
 
     options.actualSPS = 1000000.0 * options.sampleCount / elapsed;
-    
+    options.capturedSPS = options.actualSPS;
+
 	printf("sps=%d\n", options.actualSPS);
 
 
@@ -683,7 +684,7 @@ void displayChart(int fps) {
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
-    usleep(1000);
+    usleep(1500);
 
     pthread_mutex_unlock(&screenLock);
 }

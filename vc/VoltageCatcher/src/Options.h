@@ -50,6 +50,7 @@ public:
 	char *sampleFileName;
 	FILE *sampleFile;
     int  actualSPS;
+    int  capturedSPS;
     float sampleScale = 1.0;
 
     long long captureMessage = 0;

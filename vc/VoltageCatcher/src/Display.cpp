@@ -109,7 +109,9 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
     long long elapsed = now - options.captureMessage;
     if (elapsed < 6000) {
         sprintf(message, "Data Saved");
-        Paint_DrawString_EN(maxX/2 - (17 * strlen(message)/2), maxY/2 - 12, message, &Font24, BLACK, WHITE);
+        Paint_DrawString_EN(maxX/2 - (17 * strlen(message)/2), maxY/2 - 24, message, &Font24, BLACK, WHITE);
+        sprintf(message, "SPS: %d",options.capturedSPS);
+        Paint_DrawString_EN(maxX / 2 - (17 * strlen(message) / 2), maxY / 2 , message, &Font24, BLACK, WHITE);
     }
 
     //memcpy(chartImage, localImage, imageSize);
