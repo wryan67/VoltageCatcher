@@ -67,7 +67,7 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
     };
 
     char message[32];
-    sprintf(message, "%4.2f", options.refVolts);
+    sprintf(message, "%4.2fv", options.refVolts);
     Paint_DrawString_EN(1, 1, message, &Font24, BLACK, LGRAY);
 
     if (fps > 0) {
@@ -97,9 +97,7 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
 
     sprintf(message, "%d-sps", options.actualSPS);
     Paint_DrawString_EN(maxX - (17 * strlen(message)), 1, message, &Font24, BLACK, WHITE);
-
-    
-    sprintf(message, "ch", options.refVolts);
+    strcpy(message, "ch");
     Paint_DrawString_EN(maxX - (17 * strlen(message)), 24, message, &Font24, DARKBLUE, LGRAY);
 
     for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {

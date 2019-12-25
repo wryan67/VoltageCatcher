@@ -481,7 +481,6 @@ void takeSampleActivation(void) {
             }
             daemonSample++;
 
-
 			piUnlock(1);
 			return;
 		}
@@ -496,7 +495,7 @@ void takeSampleActivation(void) {
 			}
 
 			if (!checkTrigger( volts )) {
-				piUnlock(1);
+                piUnlock(1);
 				return;
 			}
 		} 
@@ -512,7 +511,7 @@ void takeSampleActivation(void) {
             options.sampleIndex = 0;
 		}
 	}
-	piUnlock(1);
+    piUnlock(1);
 }
 
 void pwmDutyCycle(int pwmOutputPin, int speed) {
@@ -684,6 +683,7 @@ void displayChart(int fps) {
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
+    usleep(1000);
 
     pthread_mutex_unlock(&screenLock);
 }
@@ -786,10 +786,7 @@ void* zetaRead(void*) {
 
             zetaCount = 0;
             resetTrigger(zeta.channelVolts[0]);
-            //delay(10);
-            continue;
         }
-
     }
 
     printf("zetaRead-ends\n"); fflush(stdout);
