@@ -45,6 +45,8 @@ public:
 	bool loadSPIDriver = false;
 	int  spiHandle = -1;
 	int  spiChannel = 0;
+    int  spiSpeed = 2000000;
+    int  displaySPISpeed = 90000000;
 
 	int   debugLevel = 0;
 	char *sampleFileName;

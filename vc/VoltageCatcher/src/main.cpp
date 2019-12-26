@@ -45,57 +45,56 @@ bool setup() {
 
 
 	// spi limit
-	int spiSpeed = 0;
 
     if (options.refVolts > 4.5) {
-        spiSpeed = 9000000;
+        options.spiSpeed = 9000000;
 
         if (options.desiredSPSk < 29) {
-            spiSpeed = 600000;
+            options.spiSpeed = 600000;
         }
         if (options.desiredSPSk < 26) {
-            spiSpeed = 5000000;
+            options.spiSpeed = 5000000;
         }
         if (options.desiredSPSk < 23) {
-            spiSpeed = 4600000;
+            options.spiSpeed = 4600000;
         }
         if (options.desiredSPSk < 17) {
-            spiSpeed = 4000000;
+            options.spiSpeed = 4000000;
         }
         if (options.desiredSPSk < 8) {
-            spiSpeed = 3000000;
+            options.spiSpeed = 3000000;
         }
 
     }
     else {
-        spiSpeed = 6000000;
+        options.spiSpeed = 6000000;
 
         if (options.desiredSPSk < 31) {
-            spiSpeed = 2900000;
+            options.spiSpeed = 2900000;
         }
         if (options.desiredSPSk < 29) {
-            spiSpeed = 2750000;
+            options.spiSpeed = 2750000;
         }
         if (options.desiredSPSk < 26) {
-            spiSpeed = 2500000;
+            options.spiSpeed = 2500000;
         }
         if (options.desiredSPSk < 23) {
-            spiSpeed = 2300000;
+            options.spiSpeed = 2300000;
         }
         if (options.desiredSPSk < 17) {
-            spiSpeed = 2000000;
+            options.spiSpeed = 2000000;
         }
         if (options.desiredSPSk < 8) {
-            spiSpeed = 1500000;
+            options.spiSpeed = 1500000;
         }
     }
 
     if (options.zetaMode) {
-        spiSpeed = 9000000;
+        options.spiSpeed = 9000000;
     }
 
 
-	if ((options.spiHandle = wiringPiSPISetup(options.spiChannel, spiSpeed)) < 0)
+	if ((options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed)) < 0)
 	{
 		fprintf(stderr, "opening SPI bus failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
@@ -291,6 +290,7 @@ void dumpResults() {
 
 
     if (!options.zetaMode) {
+        options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
         digitalWrite(10, HIGH);
         digitalWrite(11, HIGH);
         digitalWrite(26, LOW);
@@ -668,7 +668,7 @@ void displayChart(int fps) {
     pthread_mutex_lock(&screenLock);
 
     close(options.spiHandle);
-    options.spiHandle = wiringPiSPISetup(options.spiChannel, 90000000);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
     digitalWrite(10, HIGH);
     digitalWrite(11, HIGH);
     digitalWrite(26, LOW);
@@ -680,7 +680,7 @@ void displayChart(int fps) {
     displayResults(options, chartData, fps);
 
     close(options.spiHandle);
-    options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed);
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
@@ -694,7 +694,7 @@ void displayCapturingLock() {
     pthread_mutex_lock(&screenLock);
 
     close(options.spiHandle);
-    options.spiHandle = wiringPiSPISetup(options.spiChannel, 90000000);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
     digitalWrite(10, HIGH);
     digitalWrite(11, HIGH);
     digitalWrite(26, LOW);
@@ -706,7 +706,7 @@ void displayCapturingLock() {
     displayCapturing();
 
     close(options.spiHandle);
-    options.spiHandle = wiringPiSPISetup(options.spiChannel, 9000000);
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed);
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
@@ -926,6 +926,7 @@ int main(int argc, char **argv)
     pinMode(11, OUTPUT);
     pinMode(26, OUTPUT);
 
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
     digitalWrite(10, HIGH);
     digitalWrite(11, HIGH);
     digitalWrite(26, LOW);
@@ -933,6 +934,7 @@ int main(int argc, char **argv)
     LCD_Init();
     LCD_Clear(BLACK);
 
+    options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed);
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
