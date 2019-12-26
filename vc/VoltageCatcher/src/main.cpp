@@ -45,6 +45,7 @@ bool setup() {
 
 
 	// spi limit
+    int saveSPISpeed = options.spiSpeed;
 
     if (options.refVolts > 4.5) {
         options.spiSpeed = 9000000;
@@ -90,9 +91,15 @@ bool setup() {
     }
 
     if (options.zetaMode) {
-        options.spiSpeed = 9000000;
+//      options.spiSpeed =  9000000;
+        options.spiSpeed =  3600000;
     }
 
+    if (options.spiOverride) {
+        options.spiSpeed = saveSPISpeed;
+    }
+
+    printf("options.spiSpeed=%d\n", options.spiSpeed);
 
 	if ((options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed)) < 0)
 	{
@@ -133,7 +140,7 @@ bool setup() {
 	}
 
 
-	// pwmFrequency in Hz = 19.2e6 Hz / pwmClock / pwmRange.
+	// pwmFrequency in Hzhttps://images-na.ssl-images-amazon.com/images/I/51nZyfKbbfL._SX425_.jpg = 19.2e6 Hz / pwmClock / pwmRange.
 
 // random number generator
 	int seed;
@@ -312,6 +319,7 @@ unsigned int readChannel(int channel)
 	buffer[1] = (options.channelType + channel) << 4;
 
 	wiringPiSPIDataRW(options.spiChannel, buffer, 3);
+    
 
     pthread_mutex_unlock(&screenLock);
 
@@ -818,7 +826,7 @@ void dataCapture() {
     float min = 999999;
 
     for (int i = 0; i < options.sampleCount; ++i) {
-        delayMicroseconds(10);
+        //delayMicroseconds(10);
         volts = getVolts(readChannel(channels[0]));
         if (volts > max) max = volts;
         if (volts < min) min = volts;
@@ -856,7 +864,7 @@ void dataCapture() {
 
     // wait for mid-cycle
     for (int i = 0; i < options.sampleCount; ++i) {
-        delayMicroseconds(10);
+        //delayMicroseconds(10);
         volts = getVolts(readChannel(channels[0]));
 
         if (options.triggerVector > 0) {
@@ -875,7 +883,7 @@ void dataCapture() {
 
     // wait for cycle
     for (int i = 0; i < options.sampleCount; ++i) {
-        delayMicroseconds(10);
+        //delayMicroseconds(10);
         volts = getVolts(readChannel(channels[0]));
 
         if (options.triggerVector > 0) {

@@ -45,7 +45,8 @@ public:
 	bool loadSPIDriver = false;
 	int  spiHandle = -1;
 	int  spiChannel = 0;
-    int  spiSpeed = 2000000;
+    bool spiOverride = false;
+    int  spiSpeed = -1;
     int  displaySPISpeed = 90000000;
 
 	int   debugLevel = 0;

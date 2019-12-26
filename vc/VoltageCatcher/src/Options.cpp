@@ -25,7 +25,8 @@ void Options::usage() {
 	fprintf(stderr, "  -d = debug level [0-2]; default 0 (none)\n");
 	fprintf(stderr, "  -f = desired clock frequency [%d-%d] kHz\n", minSPS, maxSPS);
 	fprintf(stderr, "  -h = suppress headers\n");
-	fprintf(stderr, "  -l = gpio load spi\n");
+    fprintf(stderr, "  -i = override default spi speed\n");
+    fprintf(stderr, "  -l = gpio load spi\n");
 	fprintf(stderr, "  -m = daemon mode\n");
 	fprintf(stderr, "  -o = output file name\n");
     fprintf(stderr, "  -r = reference voltage, default=3.3\n");
@@ -48,14 +49,15 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		usage();
 	}
 
-	const char* shortOptions = "c:d:f:hlmo:r:s:t:vx:z";
+	const char* shortOptions = "c:d:f:hi:lmo:r:s:t:vx:z";
 
 	static struct option longOptions[] = {
 		{"channel",     required_argument, NULL, 'c'},
 		{"debug",       optional_argument, NULL, 'd'},
 		{"freq",        required_argument, NULL, 'f'},
 		{"headers",     optional_argument, NULL, 'h'},
-		{"loadSPI",     optional_argument, NULL, 'l'},
+        {"spi",         optional_argument, NULL, 'i'},
+        {"loadSPI",     optional_argument, NULL, 'l'},
 		{"daemon",      optional_argument, NULL, 'm'},
 		{"output",      required_argument, NULL, 'o'},
         {"refVolts",    optional_argument, NULL, 'r'},
@@ -99,6 +101,11 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		case 'h':
 			suppressHeaders = true;
 			break;
+
+        case 'i':
+            spiOverride = true;
+            sscanf(optarg, "%d", &spiSpeed);
+            break;
 
 		case 'l':
 			loadSPIDriver = true;
