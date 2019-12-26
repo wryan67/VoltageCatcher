@@ -140,8 +140,6 @@ bool setup() {
 	}
 
 
-	// pwmFrequency in Hzhttps://images-na.ssl-images-amazon.com/images/I/51nZyfKbbfL._SX425_.jpg = 19.2e6 Hz / pwmClock / pwmRange.
-
 // random number generator
 	int seed;
 	FILE *fp;
@@ -309,7 +307,9 @@ void dumpResults() {
 
 unsigned int readChannel(int channel)
 {
-    pthread_mutex_lock(&screenLock);
+    if (options.zetaMode) {
+        pthread_mutex_lock(&screenLock);
+    }
 
 	if (0 > channel || channel > 7) {
 		return -1;
@@ -320,9 +320,9 @@ unsigned int readChannel(int channel)
 
 	wiringPiSPIDataRW(options.spiChannel, buffer, 3);
     
-
-    pthread_mutex_unlock(&screenLock);
-
+    if (options.zetaMode) {
+        pthread_mutex_unlock(&screenLock);
+    }
 	return ((buffer[1] & 3) << 8) + buffer[2];
 }
 
@@ -366,8 +366,18 @@ float takeSample(int channelIndex)
 }
 
 
+static volatile int sampleClockCounter = 0;
 
+void* sampleClockRateTPS(void*) {
+    printf("sampleClockRateTPS()::start\n");
+    sampleClockCounter = 0;
 
+    while (1) {
+        usleep(1000000);
+        printf("desired sps=%dk; actual SPS=%d\n", options.desiredSPSk, sampleClockCounter); //fflush(stdout);
+        sampleClockCounter = 0;
+    }
+}
 
 
 
@@ -458,15 +468,17 @@ void dataCaputreActivation(void) {
 }
 
 void takeSampleActivation(void) {
-	piLock(1);
+//    sampleClockCounter++;
 
-	if (options.sampelingActive) {
+    piLock(1);
 
-		if (options.daemon) {
+    if (options.sampelingActive) {
 
-			for (int i = 0; channels[i] >= 0; ++i) {
-				takeSample(i);
-			}
+        if (options.daemon) {
+
+            for (int i = 0; channels[i] >= 0; ++i) {
+                takeSample(i);
+            }
 
             long long timestamp = samples[options.sampleIndex][channels[0]].timestamp.count() - samples[0][channels[0]].timestamp.count();
 
@@ -475,7 +487,7 @@ void takeSampleActivation(void) {
                 zeta.sample = daemonSample;
                 zeta.timestamp = timestamp;
                 for (int i = 0; channels[i] >= 0; ++i) {
-                    zeta.channelVolts[i]=samples[options.sampleIndex][channels[i]].volts;
+                    zeta.channelVolts[i] = samples[options.sampleIndex][channels[i]].volts;
                 }
                 write(options.zetaPipes[1], &zeta, sizeof(zeta));
             }
@@ -490,38 +502,39 @@ void takeSampleActivation(void) {
             }
             daemonSample++;
 
-			piUnlock(1);
-			return;
-		}
+            piUnlock(1);
+            return;
+        }
 
 
-		float volts=takeSample( 0 );
+        float volts = takeSample(0);
 
-		if (!options.triggerMet) {
-			if (options.debugLevel) {
-				printf("options.triggerMet= %d; voltage=%f, options.lastVolts=%f\n", options.triggerMet, 
-					samples[options.sampleIndex][channels[0]].volts, options.lastVolts);
-			}
+        if (!options.triggerMet) {
+            if (options.debugLevel) {
+                printf("options.triggerMet= %d; voltage=%f, options.lastVolts=%f\n", options.triggerMet,
+                    samples[options.sampleIndex][channels[0]].volts, options.lastVolts);
+            }
 
-			if (!checkTrigger( volts )) {
+            if (!checkTrigger(volts)) {
                 piUnlock(1);
-				return;
-			}
-		} 
+                return;
+            }
+        }
 
 
-		for (int i = 1; channels[i] >= 0; ++i) {
-			takeSample( i );
-		}
+        for (int i = 1; channels[i] >= 0; ++i) {
+            takeSample(i);
+        }
 
-		if (++options.sampleIndex >= options.sampleCount) {
-			options.sampelingActive = false;
-			dumpResults();
+        if (++options.sampleIndex >= options.sampleCount) {
+            options.sampelingActive = false;
+            dumpResults();
             options.sampleIndex = 0;
-		}
-	}
+        }
+    }
     piUnlock(1);
 }
+
 
 void pwmDutyCycle(int pwmOutputPin, int speed) {
 
@@ -911,7 +924,9 @@ int main(int argc, char **argv)
 		fprintf(stderr, "please use sudo to execute this command\n");
 		exit(2);
 	}
-	char cmd[128];
+    piHiPri(99);
+
+    char cmd[128];
 
 
 	sprintf(cmd, "ps -ef | awk '{if (/usr.local.bin.vc / && !/awk/ && $2!=%d && $2!=%d) system(sprintf(\"kill -9 %%d\",$2))}'", getpid(),getppid());
@@ -927,7 +942,9 @@ int main(int argc, char **argv)
 		printf("setup failed\n");
 		exit(2);
 	}
-    
+
+//    threadCreate(sampleClockRateTPS, "sampleRateTPS");
+
     GPIO_Config();
 
     pinMode(10, OUTPUT);
