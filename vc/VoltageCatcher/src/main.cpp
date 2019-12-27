@@ -826,7 +826,6 @@ void* zetaRead(void*) {
     auto lastSecond = second;
 
 
-//    while (read(options.zetaPipes[0], &zeta, sizeof(zeta))) {
     while (true) {
         while (!zetaBang); zetaBang = 0;
 
@@ -844,9 +843,6 @@ void* zetaRead(void*) {
             beginSampleTime = std::chrono::system_clock::now();
         }
 
-
-
-      //  printf("tag01\n");
 
         for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
             Sample* s = &chartData[zetaCount][channelIndex];
