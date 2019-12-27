@@ -7,13 +7,12 @@
 #include "main.h"
 
 Options options = Options();
-Sample  samples[maxSamples + 1][MCP3008_CHANNELS] = { Sample() };
+Sample  samples[10* maxSamples + 1][MCP3008_CHANNELS] = { Sample() };
+Sample  chartData[10* maxSamples + 1][MCP3008_CHANNELS];
 int     channels[MCP3008_CHANNELS + 1];
 
 
-Sample  chartData[maxSamples + 1][MCP3008_CHANNELS];
-static bool   triggerMet;
-static float  lastVolts;
+//static float  lastVolts;
 static bool   foundMax;
 static bool   foundMin;
 static float  maxVoltage;
@@ -21,9 +20,29 @@ static float  minVoltage;
 //static int    triggerVector;
 
 
-pthread_mutex_t screenLock;
+pthread_mutex_t spiBusLock;
 int zetaCount = 0;
 bool dataCaptureActive = false;
+
+static volatile bool  triggerMet;
+static volatile bool  verbose = false;
+static volatile bool  zetaMode = false;
+static volatile bool  daemonMode = false;
+static volatile bool  zetaBang = false;
+static volatile bool  samplingActive = false;
+static volatile int   sampleCount;
+static volatile int   sampleIndex;
+static volatile int   maxChannels;
+static volatile float refVolts;
+static volatile float lastVolts;
+long long daemonSample = 0;
+
+
+struct zetaStruct {
+    float channelVolts[8];
+};
+
+long long lastSave;
 
 
 
@@ -47,8 +66,8 @@ bool setup() {
 	// spi limit
     int saveSPISpeed = options.spiSpeed;
 
-    if (options.refVolts > 4.5) {
-        options.spiSpeed = 9000000;
+    if (refVolts > 4.5) {
+        options.spiSpeed = 8500000;
 
         if (options.desiredSPSk < 29) {
             options.spiSpeed = 600000;
@@ -91,8 +110,7 @@ bool setup() {
     }
 
     if (options.zetaMode) {
-//      options.spiSpeed =  9000000;
-        options.spiSpeed =  3600000;
+        options.spiSpeed = 8500000;
     }
 
     if (options.spiOverride) {
@@ -307,62 +325,71 @@ void dumpResults() {
 
 unsigned int readChannel(int channel)
 {
-    if (options.zetaMode) {
-        pthread_mutex_lock(&screenLock);
-    }
 
-	if (0 > channel || channel > 7) {
-		return -1;
-	}
-
-	unsigned char buffer[3] = { 1 };
+    
+    unsigned char buffer[3] = { 1, 0, 0 };
 	buffer[1] = (options.channelType + channel) << 4;
 
-	wiringPiSPIDataRW(options.spiChannel, buffer, 3);
-    
-    if (options.zetaMode) {
-        pthread_mutex_unlock(&screenLock);
-    }
+    pthread_mutex_lock(&spiBusLock);
+    wiringPiSPIDataRW(options.spiChannel, buffer, 3);
+    pthread_mutex_unlock(&spiBusLock);
+
 	return ((buffer[1] & 3) << 8) + buffer[2];
+    
 }
 
 float getVolts(int bits) {
-	return ((bits)*options.refVolts) / 1024.0;
+	return ((bits)*refVolts) / 1024.0;
 }
 
-float takeSample(int channelIndex)
-{
-	int channel = channels[channelIndex];
+float takeSample(int channelIndex) {
 
-	Sample *sample = &samples[options.sampleIndex][channel];
+    volatile int channel = channels[channelIndex];
+	Sample *sample = &samples[sampleIndex][channel];
 
-	if (0 > channel || channel > 7) {
-		fprintf(stderr, "readChannel encountered invalid channel: %d\n", channel);
-		exit(9);
-	}
+    if (verbose) {
+        if (0 > channel || channel > 7) {
+        	fprintf(stderr, "readChannel encountered invalid channel: %d\n", channelIndex);
+        	exit(9);
+        }
 
-	if (options.debugLevel>1) {
-		printf("taking sample %d on channel %d: ", options.sampleIndex, channel); fflush(stdout);
-	}
+        if (options.debugLevel>1) {
+        	printf("taking sample %d on channel %d: ", sampleIndex, channelIndex); fflush(stdout);
+        }
+    }
 
-	auto p1 = std::chrono::system_clock::now();
-	std::chrono::microseconds start = duration_cast<microseconds>(p1.time_since_epoch());
+    std::chrono::microseconds start;
+    if (sampleIndex == 0 || sampleIndex==sampleCount-1 || verbose) {
+        auto p1 = std::chrono::system_clock::now();
+        start = duration_cast<microseconds>(p1.time_since_epoch());
+        sample->timestamp = start;
+    }
 
-	int bits = readChannel(channel);
+    unsigned char buffer[3] = { 1, 0, 0 };
+    buffer[1] = (options.channelType + channel) << 4;
 
-	auto p2 = std::chrono::system_clock::now();
-	std::chrono::microseconds end = duration_cast<microseconds>(p2.time_since_epoch());
+    pthread_mutex_lock(&spiBusLock);
+    wiringPiSPIDataRW(options.spiChannel, buffer, 3);
+    pthread_mutex_unlock(&spiBusLock);
 
-	sample->channel = channel;
-	sample->timestamp = start;
-	sample->elapsed = end.count() - start.count();
-	sample->bits = bits;
-	sample->volts = getVolts(bits);
+	volatile int   bits  = ((buffer[1] & 3) << 8) + buffer[2];
+    volatile float volts = volts = ((bits)*refVolts) / 1024.0;
 
-	if (options.debugLevel>1) {
+    if (verbose) {
+        auto p2 = std::chrono::system_clock::now();
+        std::chrono::microseconds end = duration_cast<microseconds>(p2.time_since_epoch());
+        sample->timestamp = start;
+        sample->elapsed = end.count() - start.count();
+        sample->bits = bits;
+        sample->channel = channel;
+    }
+
+    sample->volts = volts;
+
+	if (verbose && options.debugLevel>1) {
 		printf(" volts=%f: \n", sample->volts); fflush(stdout);
 	}
-	return sample->volts;
+	return volts;
 }
 
 
@@ -382,8 +409,8 @@ void* sampleClockRateTPS(void*) {
 
 
 bool checkTrigger(float volts) {
-	float vector = volts - options.lastVolts;
-	options.lastVolts = volts;
+	float vector = volts - lastVolts;
+	lastVolts = volts;
 
 	if (vector == 0) {
 		return false;
@@ -395,7 +422,7 @@ bool checkTrigger(float volts) {
 		} else {
 			if (volts >= options.triggerVoltage) {
 				if (options.debugLevel) printf("triggerd at %f volts\n", volts);
-				options.triggerMet = true;
+				triggerMet = true;
 				return true;
 			}
 		}
@@ -405,7 +432,7 @@ bool checkTrigger(float volts) {
 		} else {
 			if (volts <= options.triggerVoltage) {
 				if (options.debugLevel) printf("triggerd at %f volts\n", volts);
-				options.triggerMet = true;
+				triggerMet = true;
 				return true;
 			}
 		}
@@ -424,20 +451,11 @@ void breakOut(int out) {
 	}
 }
 
-volatile static long long daemonSample = 0;
-
-struct zetaStruct {
-    long long sample;
-    long long timestamp;
-    float channelVolts[8];
-};
-
-long long lastSave;
 
 void displayCapturingLock();
-
 void dataCapture();
 void dataCaputreActivation(void) {
+
     piLock(3);
     long long now = currentTimeMillis();
     long elapsed = now - lastSave;
@@ -445,62 +463,64 @@ void dataCaputreActivation(void) {
         piUnlock(3);
         return;
     }
+    daemonMode = false;
+    samplingActive = false;
     dataCaptureActive = true;
+    delay(100);
     printf("data capture begins...\n");
 
-    options.sampelingActive = false;
-    options.daemon = false;
     displayCapturingLock();
-
     dataCapture();
 
-    while (options.sampelingActive) {
+    while (samplingActive) {
         delay(10);
     }
 
     printf("end capture detected\n");
     options.captureMessage = currentTimeMillis();
-    options.daemon = true;
-    options.sampelingActive = true;
+    sampleIndex = 0;
+    daemonMode = true;
     lastSave = now;
+    dataCapture();
+
+
     dataCaptureActive = false;
     piUnlock(3);
 }
 
+
 void takeSampleActivation(void) {
-//    sampleClockCounter++;
+    //    sampleClockCounter++;
 
     piLock(1);
 
-    if (options.sampelingActive) {
+    if (samplingActive) {
 
-        if (options.daemon) {
+        if (daemonMode) {
 
             for (int i = 0; channels[i] >= 0; ++i) {
                 takeSample(i);
             }
 
-            long long timestamp = samples[options.sampleIndex][channels[0]].timestamp.count() - samples[0][channels[0]].timestamp.count();
+            long long timestamp = samples[sampleIndex][channels[0]].timestamp.count() - samples[0][channels[0]].timestamp.count();
 
-            if (options.zetaMode) {
-                struct zetaStruct zeta;
-                zeta.sample = daemonSample;
-                zeta.timestamp = timestamp;
-                for (int i = 0; channels[i] >= 0; ++i) {
-                    zeta.channelVolts[i] = samples[options.sampleIndex][channels[i]].volts;
-                }
-                write(options.zetaPipes[1], &zeta, sizeof(zeta));
+            if (daemonMode && zetaMode) {
+//                for (int i = 0; channels[i] >= 0; ++i) {
+//                    zeta.channelVolts[i] = samples[sampleIndex][channels[i]].volts;
+//                }
+//                write(options.zetaPipes[1], &zeta, sizeof(zeta));
+                zetaBang = 1;
             }
             else {
                 breakOut(fprintf(options.sampleFile, "%lld,%lld", daemonSample, timestamp));
 
                 for (int i = 0; channels[i] >= 0; ++i) {
-                    breakOut(fprintf(options.sampleFile, ",%f", samples[options.sampleIndex][channels[i]].volts));
+                    breakOut(fprintf(options.sampleFile, ",%f", samples[sampleIndex][channels[i]].volts));
                 }
 
                 breakOut(fprintf(options.sampleFile, "\n"));
+                daemonSample++;
             }
-            daemonSample++;
 
             piUnlock(1);
             return;
@@ -509,10 +529,10 @@ void takeSampleActivation(void) {
 
         float volts = takeSample(0);
 
-        if (!options.triggerMet) {
+        if (!triggerMet) {
             if (options.debugLevel) {
-                printf("options.triggerMet= %d; voltage=%f, options.lastVolts=%f\n", options.triggerMet,
-                    samples[options.sampleIndex][channels[0]].volts, options.lastVolts);
+                printf("triggerMet= %d; voltage=%f, lastVolts=%f\n", triggerMet,
+                    samples[sampleIndex][channels[0]].volts, lastVolts);
             }
 
             if (!checkTrigger(volts)) {
@@ -526,13 +546,72 @@ void takeSampleActivation(void) {
             takeSample(i);
         }
 
-        if (++options.sampleIndex >= options.sampleCount) {
-            options.sampelingActive = false;
+        if (++sampleIndex >= sampleCount) {
+            samplingActive = false;
             dumpResults();
-            options.sampleIndex = 0;
+            sampleIndex = 0;
         }
     }
     piUnlock(1);
+}
+
+void takeSampleActivationMin(void) {
+    if (!samplingActive) {
+        return;
+    }
+
+    for (int i = 0; i < maxChannels; ++i) {
+        takeSample(i);
+    }
+
+    if (daemonMode && zetaMode) {
+        zetaBang=1;
+        return;
+    }
+
+
+    if (++sampleIndex >= sampleCount) {
+        samplingActive = false;
+        dumpResults();
+        sampleIndex = 0;
+    }
+}
+
+void* takeSamplePolling(void*) {
+    struct pollfd pfd;
+    int    fd;
+    char   buf[128];
+
+    
+    sprintf(buf, "/sys/class/gpio/gpio%d/value", ClockInPinBCM);
+
+    if ((fd = open(buf, O_RDONLY)) < 0) {
+        fprintf(stderr, "Failed, gpio %d not exported.\n", ClockInPinBCM);
+        exit(1);
+    }
+
+    pfd.fd = fd;
+    pfd.events = POLLPRI;
+
+    char lastValue = 0;
+    int  xread = 0;
+
+    lseek(fd, 0, SEEK_SET);    /* consume any prior interrupt */
+    read(fd, buf, sizeof buf);
+
+    while (true) {
+        //  poll(&pfd, 1, -1);         /* wait for interrupt */
+        lseek(fd, 0, SEEK_SET);    /* consume interrupt */
+        xread = read(fd, buf, sizeof(buf));
+
+        if (xread > 0) {
+            if (buf[0] != lastValue) {
+                ++sampleClockCounter;
+                lastValue = buf[0];
+                takeSampleActivationMin();
+            }
+        }
+    }
 }
 
 
@@ -574,8 +653,8 @@ void frame(long frame) {
     // x-axis
     Paint_DrawLine(1, maxY, maxX, maxY, WHITE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
 
-    for (int v = 1; v < options.refVolts; ++v) {
-        int y = maxY - ((v / options.refVolts) * maxY);
+    for (int v = 1; v < refVolts; ++v) {
+        int y = maxY - ((v / refVolts) * maxY);
         Paint_DrawLine(1, y, maxX, y, BROWN, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
     }   Paint_DrawLine(1, 1, maxX, 1, DARKBLUE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
 
@@ -591,7 +670,7 @@ void frame(long frame) {
     };
 
     char message[32];
-    sprintf(message, "%4.2f", options.refVolts);
+    sprintf(message, "%4.2f", refVolts);
     Paint_DrawString_EN(1, 1, message, &Font24, BLACK, LGRAY);
 
     sprintf(message, "%ld-frame", frame);
@@ -685,8 +764,8 @@ bool checkTriggerZeta(float volts) {
 
 
 void displayChart(int fps) {
-
-    pthread_mutex_lock(&screenLock);
+    samplingActive = false;
+    usleep(100);
 
     close(options.spiHandle);
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
@@ -707,22 +786,21 @@ void displayChart(int fps) {
     digitalWrite(26, HIGH);
     usleep(1500);
 
-    pthread_mutex_unlock(&screenLock);
+    samplingActive = true;
+
 }
 
 void displayCapturingLock() {
+    samplingActive = false;
+    usleep(100);
 
-    pthread_mutex_lock(&screenLock);
+    pthread_mutex_lock(&spiBusLock);
 
     close(options.spiHandle);
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
     digitalWrite(10, HIGH);
     digitalWrite(11, HIGH);
     digitalWrite(26, LOW);
-
-    for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
-        Sample* s = &chartData[1][channelIndex];
-    }
 
     displayCapturing();
 
@@ -731,50 +809,49 @@ void displayCapturingLock() {
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
+    delay(100);
 
-    pthread_mutex_unlock(&screenLock);
+    pthread_mutex_unlock(&spiBusLock);
 }
 
 
 void* zetaRead(void*) {
     bool firstVoltage = true;
-    int frameCount = 0;
-    int lastFPS = 0;
-    int fps = 0;
+    int  frameCount = 0;
+    int  lastFPS = 0;
+    int  fps = 0;
     auto beginSampleTime = std::chrono::system_clock::now();
 
     auto second = duration_cast<seconds>(beginSampleTime.time_since_epoch());
     auto lastSecond = second;
 
-    struct zetaStruct zeta;
 
-
-    while (read(options.zetaPipes[0], &zeta, sizeof(zeta))) {
+//    while (read(options.zetaPipes[0], &zeta, sizeof(zeta))) {
+    while (true) {
+        while (!zetaBang); zetaBang = 0;
 
         if (firstVoltage) {
-            resetTrigger(zeta.channelVolts[0]);
+            resetTrigger(samples[0][0].volts);
             firstVoltage = false;
         }
 
-        if (!checkTriggerZeta(zeta.channelVolts[0])) {
+
+        if (!checkTriggerZeta(samples[0][0].volts)) {
             continue;
         }
+
         if (zetaCount == 0) {
             beginSampleTime = std::chrono::system_clock::now();
         }
 
-        int channelIndex = 0;
-
-        Sample* s = &chartData[zetaCount][0];
-        s->channel = channels[channelIndex];
-        s->volts = zeta.channelVolts[0];
 
 
+      //  printf("tag01\n");
 
-        for (channelIndex = 1; channels[channelIndex] >= 0; ++channelIndex) {
+        for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
             Sample* s = &chartData[zetaCount][channelIndex];
             s->channel = channels[channelIndex];
-            s->volts = zeta.channelVolts[channelIndex];
+            s->volts = samples[0][channelIndex].volts;
         }
 
         int maxX = LCD_HEIGHT * options.sampleScale;
@@ -783,6 +860,7 @@ void* zetaRead(void*) {
         if (++zetaCount % (int)(options.sampleScale * LCD_HEIGHT) == 0) {
             auto now = std::chrono::system_clock::now();
             auto second = duration_cast<seconds>(now.time_since_epoch());
+
 
             ++fps;
             if (lastSecond != second) {
@@ -803,11 +881,12 @@ void* zetaRead(void*) {
             options.actualSPS = 1000000.0 * zetaCount / elapsed;
 
 
+
             displayChart(lastFPS);
 
 
             zetaCount = 0;
-            resetTrigger(zeta.channelVolts[0]);
+            resetTrigger(samples[0][0].volts);
         }
     }
 
@@ -816,7 +895,7 @@ void* zetaRead(void*) {
 }
 
 void setupZeta() {
-    if (pthread_mutex_init(&screenLock, NULL) != 0) {
+    if (pthread_mutex_init(&spiBusLock, NULL) != 0) {
         printf("\n mutex init has failed\n");
         exit(9);
     }
@@ -838,7 +917,7 @@ void dataCapture() {
     float max = 0;
     float min = 999999;
 
-    for (int i = 0; i < options.sampleCount; ++i) {
+    for (int i = 0; i < sampleCount; ++i) {
         //delayMicroseconds(10);
         volts = getVolts(readChannel(channels[0]));
         if (volts > max) max = volts;
@@ -866,56 +945,27 @@ void dataCapture() {
             exit(0);
         }
     }
-
+    if (options.autoTrigger) {
+        options.triggerVoltage = min + (max - min) / 2;
+        printf("trigger voltage=%5.3f\n", options.triggerVoltage);
+    }
 
     if (min > max) {
         fprintf(stderr, "Not enough voltage variance to detect cycle\n");
         exit(0);
     }
+
+
     volts = getVolts(readChannel(channels[0]));
     if (options.debugLevel) printf("starting volts:     %f\n", volts);
 
-    // wait for mid-cycle
-    for (int i = 0; i < options.sampleCount; ++i) {
-        //delayMicroseconds(10);
-        volts = getVolts(readChannel(channels[0]));
+    resetTrigger(volts);
 
-        if (options.triggerVector > 0) {
-            if (volts > min) {
-                break;
-            }
-        }
-        else {
-            if (volts < max) {
-                break;
-            }
-        }
-    }
-    if (options.debugLevel) printf("pre-cycle:          %f\n", volts);
-
-
-    // wait for cycle
-    for (int i = 0; i < options.sampleCount; ++i) {
-        //delayMicroseconds(10);
-        volts = getVolts(readChannel(channels[0]));
-
-        if (options.triggerVector > 0) {
-            if (volts < min) {
-                break;
-            }
-        }
-        else {
-            if (volts > max) {
-                break;
-            }
-        }
-    }
-
-    if (options.debugLevel) printf("cycle start:        %f\n", volts);
+    while (!checkTriggerZeta(getVolts(readChannel(channels[0]))));
 
     printf("taking samples...\n");
-    options.lastVolts = volts;
-    options.sampelingActive = true;
+    sampleIndex = 0;
+    samplingActive = true;
 }
 
 int main(int argc, char **argv)
@@ -936,7 +986,21 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
- 
+    verbose     = options.verboseOutput;
+    daemonMode  = options.daemon;
+    zetaMode    = options.zetaMode;
+    refVolts    = options.refVolts;
+    sampleCount = options.sampleCount;
+    sampleIndex = 0;
+
+
+    for (int i = 0; channels[i] >= 0; ++i) {
+        maxChannels = i+1;
+    }
+    if (verbose) {
+        printf("verbose=%d\n", verbose);
+        printf("maxChannels=%d\n", maxChannels);
+    }
 
 	if (!setup()) {
 		printf("setup failed\n");
@@ -964,8 +1028,6 @@ int main(int argc, char **argv)
     digitalWrite(11, LOW);
     digitalWrite(26, HIGH);
 
-
-
     if (options.zetaMode) {
         setupZeta();
 
@@ -984,14 +1046,7 @@ int main(int argc, char **argv)
 	printf("output file: %s\n", options.sampleFileName);
 	printf("daemon mode: %s\n", (options.daemon)?"true":"false");
 
-    
-
-	if (wiringPiISR(ClockInPin, INT_EDGE_BOTH, &takeSampleActivation) < 0)
-	{
-		fprintf(stderr, "Unable to setup ISR: %s\n", strerror(errno));
-		return 1;
-	}
-
+    threadCreate(takeSamplePolling, "takeSamplePoling");
 
     if (!options.zetaMode) {
 

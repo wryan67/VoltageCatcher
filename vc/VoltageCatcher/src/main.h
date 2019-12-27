@@ -12,6 +12,7 @@
 #include <math.h>
 #include <iostream>
 #include <chrono>
+#include <poll.h>
 
 
 // engenerring
@@ -33,14 +34,15 @@ using namespace std::chrono;
 
 
 // GPIO Pins
-#define ClockOutPin 1
-#define ClockInPin  4
+#define ClockOutPin    1
+#define ClockInPin     4
+#define ClockInPinBCM  23
 #define DataCapturePin 27
 
 
 // sps is in kHz
 #define minSPS 5
-#define maxSPS 75
+#define maxSPS 200
 
 
 // trigger voltages to start sampling 

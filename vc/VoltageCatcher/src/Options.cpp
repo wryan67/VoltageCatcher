@@ -31,7 +31,7 @@ void Options::usage() {
 	fprintf(stderr, "  -o = output file name\n");
     fprintf(stderr, "  -r = reference voltage, default=3.3\n");
     fprintf(stderr, "  -s = samples [1-40000]\n");
-	fprintf(stderr, "  -t = trigger voltage [+/-][%.2f-%.2f]; default=1.65\n", triggerMin, triggerMax);
+	fprintf(stderr, "  -t = trigger voltage [+/-][%.2f-%.2f]; default=auto\n", triggerMin, triggerMax);
 	fprintf(stderr, "          0 volts--disable triggering\n");
 	fprintf(stderr, "          + volts--trigger when rising\n");
 	fprintf(stderr, "          - volts--trigger when falling\n");
@@ -128,6 +128,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 			break;
 
 		case 't':
+            autoTrigger = false;
 			sscanf(optarg, "%f", &triggerVoltage);
 			break;
 
@@ -176,28 +177,29 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		usage();
 	}
 
+    if (!autoTrigger) {
+        if (triggerVoltage < 0) {
+            triggerVector = -1;
+        }
+        triggerVoltage = abs(triggerVoltage);
 
-	if (triggerVoltage < 0) {
-		triggerVector = -1;
-	}
-	triggerVoltage = abs(triggerVoltage);
-
-	if (triggerVoltage > 0) {
-		if (triggerVoltage<triggerMin || triggerVoltage>triggerMax) {
-			fprintf(stderr, "invalid trigger voltage\n");
-			usage();
-		}
-	} else {
-		triggerMet = true;
-	}
+        if (triggerVoltage > 0) {
+            if (triggerVoltage<triggerMin || triggerVoltage>triggerMax) {
+                fprintf(stderr, "invalid trigger voltage\n");
+                usage();
+            }
+        }
+    }
 
 	printf("samples=%d\n", sampleCount);
 	printf("freq=%d\n", desiredSPSk);
     printf("reference voltage=%f\n", refVolts);
-    printf("trigger voltage=%f\n", triggerVoltage);
-	printf("trigger vector=%s\n", (triggerVector > 0) ? "rising" : "falling");
-
-
+    if (!autoTrigger) {
+        printf("trigger voltage=%f\n", triggerVoltage);
+        printf("trigger vector=%s\n", (triggerVector > 0) ? "rising" : "falling");
+    } else {
+        printf("trigger voltage=auto\n");
+    }
 
 	fflush(stdout);
 	return true;

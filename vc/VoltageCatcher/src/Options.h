@@ -24,12 +24,11 @@ public:
 	int   desiredSPSk = -1;
 	int   sampleCount = 0;
 	int   sampleIndex = 0;
-	bool  sampelingActive = false;
 	float lastVolts;
 
-	float triggerVoltage = 1.65;
+    bool  autoTrigger = true;
+	float triggerVoltage = 0;
 	int   triggerVector = 1;
-	bool  triggerMet = false;
 
 	bool daemon = false;
 	bool suppressHeaders = false;
