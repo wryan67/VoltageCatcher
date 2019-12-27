@@ -31,7 +31,7 @@ static int DEV_Equipment_Testing(void)
 	int fd;
 	char value_str[20];
 	fd = open("/etc/issue", O_RDONLY);
-    printf("Current environment: ");
+    if (USE_DEBUG) printf("Current environment: ");
 	while(1) {
 		if (fd < 0) {
 			return -1;
@@ -41,10 +41,10 @@ static int DEV_Equipment_Testing(void)
 				return -1;
 			}
 			if(value_str[i] ==32) {
-				printf("\r\n");
+                if (USE_DEBUG) printf("\r\n");
 				break;
 			}
-			printf("%c",value_str[i]);
+            if (USE_DEBUG) printf("%c",value_str[i]);
 		}
 		break;
 	}

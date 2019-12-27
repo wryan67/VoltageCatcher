@@ -19,7 +19,7 @@ class Options {
 public:
 
 	int   channelType = MCP3008_SINGLE;
-	float refVolts = 3.3;
+	float refVolts = 5.0;
 
 	int   desiredSPSk = -1;
 	int   sampleCount = 0;
@@ -60,12 +60,10 @@ public:
     int zetaPipes[2];
 
 // methods
-	void usage();
-
+	void  usage();
+    void  displayParameters();
     char* getGUID();
-
-	bool commandLineOptions(int argc, char ** argv);
-
+    bool  commandLineOptions(int argc, char ** argv);
 };
 
 extern Options options;

@@ -29,7 +29,7 @@ void Options::usage() {
     fprintf(stderr, "  -l = gpio load spi\n");
 	fprintf(stderr, "  -m = daemon mode\n");
 	fprintf(stderr, "  -o = output file name\n");
-    fprintf(stderr, "  -r = reference voltage, default=3.3\n");
+    fprintf(stderr, "  -r = reference voltage, default=5.0\n");
     fprintf(stderr, "  -s = samples [1-40000]\n");
 	fprintf(stderr, "  -t = trigger voltage [+/-][%.2f-%.2f]; default=auto\n", triggerMin, triggerMax);
 	fprintf(stderr, "          0 volts--disable triggering\n");
@@ -191,17 +191,29 @@ bool Options::commandLineOptions(int argc, char **argv) {
         }
     }
 
-	printf("samples=%d\n", sampleCount);
-	printf("freq=%d\n", desiredSPSk);
-    printf("reference voltage=%f\n", refVolts);
-    if (!autoTrigger) {
-        printf("trigger voltage=%f\n", triggerVoltage);
-        printf("trigger vector=%s\n", (triggerVector > 0) ? "rising" : "falling");
-    } else {
-        printf("trigger voltage=auto\n");
-    }
 
 	fflush(stdout);
 	return true;
+}
+
+
+void Options::displayParameters() {
+
+
+    printf("samples:            %d\n", sampleCount);
+    printf("desired sps:        %d\n", desiredSPSk);
+    printf("reference voltage:  %f\n", refVolts);
+    if (!autoTrigger) {
+        printf("trigger voltage:    %f\n", triggerVoltage);
+        printf("trigger vector:     %s\n", (triggerVector > 0) ? "rising" : "falling");
+    }
+    else {
+        printf("trigger voltage:    auto\n");
+    }
+
+
+    printf("SPI Speed:          %d\n", spiSpeed);
+    printf("output file:        %s\n", sampleFileName);
+
 }
 

@@ -8,7 +8,7 @@
 
 Options options = Options();
 Sample  samples[10* maxSamples + 1][MCP3008_CHANNELS] = { Sample() };
-Sample  chartData[10* maxSamples + 1][MCP3008_CHANNELS];
+Sample  zetaData[10* maxSamples + 1][MCP3008_CHANNELS];
 int     channels[MCP3008_CHANNELS + 1];
 
 
@@ -47,7 +47,6 @@ long long lastSave;
 
 
 bool setup() {
-	printf("\nProgram initialization\n");
 
 	if (options.loadSPIDriver && system("gpio load spi") != 0) {
 		fprintf(stderr, "SPI driver failed to load: %s\n", strerror(errno));
@@ -117,7 +116,6 @@ bool setup() {
         options.spiSpeed = saveSPISpeed;
     }
 
-    printf("options.spiSpeed=%d\n", options.spiSpeed);
 
 	if ((options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed)) < 0)
 	{
@@ -175,7 +173,7 @@ bool setup() {
 void dumpResults() {
 	auto p2 = std::chrono::system_clock::now();
 	auto end = duration_cast<microseconds>(p2.time_since_epoch());
-	auto firstSample = samples[0][0];
+	auto firstSample = samples[0][channels[0]];
 
 	long elapsed = end.count() - firstSample.timestamp.count();
 
@@ -214,7 +212,7 @@ void dumpResults() {
 		}
 
 		for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
-			fprintf(options.sampleFile, ",volts-%d", channels[channelIndex]);
+			fprintf(options.sampleFile, ",ch-%d", channels[channelIndex]);
 		}
 
 		if (options.verboseOutput) {
@@ -489,73 +487,8 @@ void dataCaputreActivation(void) {
 }
 
 
+
 void takeSampleActivation(void) {
-    //    sampleClockCounter++;
-
-    piLock(1);
-
-    if (samplingActive) {
-
-        if (daemonMode) {
-
-            for (int i = 0; channels[i] >= 0; ++i) {
-                takeSample(i);
-            }
-
-            long long timestamp = samples[sampleIndex][channels[0]].timestamp.count() - samples[0][channels[0]].timestamp.count();
-
-            if (daemonMode && zetaMode) {
-//                for (int i = 0; channels[i] >= 0; ++i) {
-//                    zeta.channelVolts[i] = samples[sampleIndex][channels[i]].volts;
-//                }
-//                write(options.zetaPipes[1], &zeta, sizeof(zeta));
-                zetaBang = 1;
-            }
-            else {
-                breakOut(fprintf(options.sampleFile, "%lld,%lld", daemonSample, timestamp));
-
-                for (int i = 0; channels[i] >= 0; ++i) {
-                    breakOut(fprintf(options.sampleFile, ",%f", samples[sampleIndex][channels[i]].volts));
-                }
-
-                breakOut(fprintf(options.sampleFile, "\n"));
-                daemonSample++;
-            }
-
-            piUnlock(1);
-            return;
-        }
-
-
-        float volts = takeSample(0);
-
-        if (!triggerMet) {
-            if (options.debugLevel) {
-                printf("triggerMet= %d; voltage=%f, lastVolts=%f\n", triggerMet,
-                    samples[sampleIndex][channels[0]].volts, lastVolts);
-            }
-
-            if (!checkTrigger(volts)) {
-                piUnlock(1);
-                return;
-            }
-        }
-
-
-        for (int i = 1; channels[i] >= 0; ++i) {
-            takeSample(i);
-        }
-
-        if (++sampleIndex >= sampleCount) {
-            samplingActive = false;
-            dumpResults();
-            sampleIndex = 0;
-        }
-    }
-    piUnlock(1);
-}
-
-void takeSampleActivationMin(void) {
     if (!samplingActive) {
         return;
     }
@@ -582,7 +515,8 @@ void* takeSamplePolling(void*) {
     int    fd;
     char   buf[128];
 
-    
+    sprintf(buf, "gpio export %d in", ClockInPinBCM);
+    system(buf);
     sprintf(buf, "/sys/class/gpio/gpio%d/value", ClockInPinBCM);
 
     if ((fd = open(buf, O_RDONLY)) < 0) {
@@ -608,7 +542,7 @@ void* takeSamplePolling(void*) {
             if (buf[0] != lastValue) {
                 ++sampleClockCounter;
                 lastValue = buf[0];
-                takeSampleActivationMin();
+                takeSampleActivation();
             }
         }
     }
@@ -774,10 +708,10 @@ void displayChart(int fps) {
     digitalWrite(26, LOW);
     
     for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
-        Sample *s = &chartData[1][channelIndex];
+        Sample *s = &zetaData[1][channels[channelIndex]];
     }
 
-    displayResults(options, chartData, fps);
+    displayResults(options, zetaData, fps);
 
     close(options.spiHandle);
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed);
@@ -829,13 +763,13 @@ void* zetaRead(void*) {
     while (true) {
         while (!zetaBang); zetaBang = 0;
 
+        int channel = channels[0];
         if (firstVoltage) {
-            resetTrigger(samples[0][0].volts);
+            resetTrigger(samples[0][channel].volts);
             firstVoltage = false;
         }
 
-
-        if (!checkTriggerZeta(samples[0][0].volts)) {
+        if (!checkTriggerZeta(samples[0][channel].volts)) {
             continue;
         }
 
@@ -845,9 +779,10 @@ void* zetaRead(void*) {
 
 
         for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
-            Sample* s = &chartData[zetaCount][channelIndex];
+            channel = channels[channelIndex];
+            Sample* s = &zetaData[zetaCount][channel];
             s->channel = channels[channelIndex];
-            s->volts = samples[0][channelIndex].volts;
+            s->volts = samples[0][channel].volts;
         }
 
         int maxX = LCD_HEIGHT * options.sampleScale;
@@ -882,7 +817,7 @@ void* zetaRead(void*) {
 
 
             zetaCount = 0;
-            resetTrigger(samples[0][0].volts);
+            resetTrigger(samples[0][channels[0]].volts);
         }
     }
 
@@ -973,6 +908,7 @@ int main(int argc, char **argv)
     piHiPri(99);
 
     char cmd[128];
+    printf("Program initialization\n");
 
 
 	sprintf(cmd, "ps -ef | awk '{if (/usr.local.bin.vc / && !/awk/ && $2!=%d && $2!=%d) system(sprintf(\"kill -9 %%d\",$2))}'", getpid(),getppid());
@@ -1002,6 +938,10 @@ int main(int argc, char **argv)
 		printf("setup failed\n");
 		exit(2);
 	}
+
+    options.displayParameters();
+    printf("setup event triggers\n");
+
 
 //    threadCreate(sampleClockRateTPS, "sampleRateTPS");
 
@@ -1036,11 +976,6 @@ int main(int argc, char **argv)
 
 
 
-	printf("setup event triggers\n");
-
-
-	printf("output file: %s\n", options.sampleFileName);
-	printf("daemon mode: %s\n", (options.daemon)?"true":"false");
 
     threadCreate(takeSamplePolling, "takeSamplePoling");
 
