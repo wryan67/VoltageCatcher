@@ -35,6 +35,10 @@ final "vc" executable into /usr/local/bin.
     $ make
     $ sudo make install
 
+## Wiring Diagram
+
+    ![ST7789](https://github.com/wryan67/VoltageCatcher/blob/master/readme/WiringDiagram.thumbnail.png?raw=true "ST7789 @ 240×320")
+
 
 ## Usage
 
