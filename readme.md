@@ -21,7 +21,7 @@ Use git to download the software from github.com:
 
     $ cd projects   { or wherever you put downloads }
     $ git clone https://github.com/wryan67/VoltageCatcher.git
-    $ cd VoltageCatcher
+    $ cd VoltageCatcher/vc/VoltageCatcher/src
 
 
 ## Install
@@ -30,7 +30,7 @@ To compile this library, navigate into the src folder and use the make utility t
 and install the library.  The sudo is required to place the final "vc" executable into /usr/local/bin.  
 
     $ cd [project folder]
-    $ cd src
+    $ cd VoltageCatcher/vc/VoltageCatcher/src
     $ make
     $ sudo make install
 
