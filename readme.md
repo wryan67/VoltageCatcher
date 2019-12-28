@@ -7,6 +7,6 @@ Voltage catcher uses a Raspberry Pi with a MCP3008 chip to capture line voltages
 ## Wiki
 The wiki page has instructions for downloading, installing, and using Voltage Catcher.
 
-   ![Wiki Link](https://github.com/wryan67/VoltageCatcher/wiki "Voltage Catcher Wiki Pages")
+   [Voltage Catcher Wiki Pages](https://github.com/wryan67/VoltageCatcher/wiki)
 
 
