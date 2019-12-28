@@ -19,7 +19,7 @@ have WiringPi installed before you can succesfully compile this library.
 ## Install
 
 To compile this library, navigate into the src folder and use the make utility to compile 
-and install the library.
+and install the library.  The sudo is required to place the final "vc" executable into /usr/local/bin.  
 
     $ cd [project folder]
     $ cd src
@@ -52,6 +52,8 @@ Below are the options with a basic description.
       -z = zeta mode (when using ST7789 240x320 display)
 
 ## Examples
+
+If you receive errors about a missing vc command, make sure /usr/local/bin is in root's path, or just spell out the full path on the command line ($ sudo /usr/local/bin/vc)
 
     $ sudo vc -s 5000 -f 20 -c 0,1 -o /home/wryan/test.csv
     Program initialization
