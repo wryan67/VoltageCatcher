@@ -46,8 +46,8 @@ using namespace std::chrono;
 
 
 // trigger voltages to start sampling 
-#define triggerMin 0.99
-#define triggerMax 2.95
+#define triggerMin 0.15
+#define triggerMax 4.85
 
 
 // methods

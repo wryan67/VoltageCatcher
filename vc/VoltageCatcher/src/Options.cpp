@@ -27,7 +27,7 @@ void Options::usage() {
 	fprintf(stderr, "  -h = suppress headers\n");
     fprintf(stderr, "  -i = override default spi speed\n");
     fprintf(stderr, "  -l = gpio load spi\n");
-	fprintf(stderr, "  -m = daemon mode\n");
+//	fprintf(stderr, "  -m = daemon mode\n");
 	fprintf(stderr, "  -o = output file name\n");
     fprintf(stderr, "  -r = reference voltage, default=5.0\n");
     fprintf(stderr, "  -s = samples [1-40000]\n");
@@ -36,7 +36,8 @@ void Options::usage() {
 	fprintf(stderr, "          + volts--trigger when rising\n");
 	fprintf(stderr, "          - volts--trigger when falling\n");
 	fprintf(stderr, "  -v = verbose output\n");
-    fprintf(stderr, "  -x = sample display scale (default=1.0\n");
+    fprintf(stderr, "  -x = sample display scale (default=1.0)\n");
+    fprintf(stderr, "  -z = zeta mode (use ST7789 240x320 display)\n");
 
 
 	exit(1);
@@ -217,6 +218,8 @@ void Options::displayParameters() {
     printf("SPI Channel:        %d\n", spiChannel);
     printf("SPI Speed:          %d\n", spiSpeed);
     printf("Output file:        %s\n", sampleFileName);
+    printf("Display scale:      %.2f\n", sampleScale);
+
     printf("-----------------------------------------------------\n");
 }
 
