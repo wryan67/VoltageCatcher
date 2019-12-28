@@ -1,7 +1,7 @@
 Voltage Catcher
 ---------------
 
-Voltage catcher uses a Raspberry Pi and and MCP3008 chip to capture line voltages and save samples to csv files.  The progam can work with or without a ST7789 LED display.  See the wiring diagram in the readme folder for instructions on connecting the MCP3008 and/or the LED display to your Raspberry Pi.   
+Voltage catcher uses a Raspberry Pi and and MCP3008 chip to capture line voltages and save samples to csv files.  The progam can work with or without a ST7789 LED display.  See the wiring diagram in the readme folder for instructions on connecting the MCP3008 and/or the LED display to your Raspberry Pi.   Once the data has been captured, you can then use WinScp or your favorite SFTP/SCP utility to copy the files to your PC or laptop.
 
 
 ## Requirements
@@ -52,4 +52,28 @@ Below are the options with a basic description.
       -z = zeta mode (when using ST7789 240x320 display)
 
 ## Examples
+
+    $ sudo vc -s 5000 -f 20 -c 0,1 -o /home/wryan/test.csv
+    Program initialization
+    -----------------------------------------------------
+    Samples:            5000
+    Desired SPS:        20k
+    Reference voltage:  5.00
+    Trigger voltage:    auto
+    Trigger vector:     rising
+    SPI Channel:        0
+    SPI Speed:          4600000
+    Output file:        /home/wryan/test.csv
+    Display scale:      1.00
+    -----------------------------------------------------
+    setup event triggers
+    priming...
+    trigger voltage=2.156
+    taking samples...
+    elapsed µs=398091
+    saving results...
+    data saved...
+    actual sps=12559
+
+When using zeta mode, the button on BCM GPIO pin 16 to activate the data capture.  The output file will be overwritten each time a data capture is initiated.
 
