@@ -12,7 +12,7 @@ On your Raspberry Pi, please use the raspi-config program to enable the SPI inte
 
 ## Prerequisites
 
-This Library is based on [WiringPi](http://wiringpi.com/), so, you'll need make sure you 
+Voltage Catcher is based on [WiringPi](http://wiringpi.com/), so, you'll need make sure you 
 have WiringPi installed before you can succesfully compile this library.  
 
 
@@ -26,8 +26,9 @@ Use git to download the software from github.com:
 
 ## Install
 
-To compile this library, navigate into the src folder and use the make utility to compile 
-and install the library.  The sudo is required to place the final "vc" executable into /usr/local/bin.  
+To compile Voltage Catcher, navigate into the src folder and use the make utility to compile 
+and install Voltage Catcher.  Sudo is required for the install command in order to place the 
+final "vc" executable into /usr/local/bin.  
 
     $ cd [project folder]
     $ cd VoltageCatcher/vc/VoltageCatcher/src
@@ -42,12 +43,13 @@ Below are the options with a basic description.
     $ sudo vc
     usage: vc -s samples
     Options:    
-      -c = channels [0-7],[0-7],etc.
+      -c = A comma separated list of input channels to scan. [0-7],[0-7],etc.  
       -d = debug level [0-2]; default 0 (none)
-      -f = desired clock frequency [5-200] kHz
-      -h = suppress headers
-      -i = override default spi speed
-      -l = gpio load spi
+      -f = desired clock frequency [5-200] kHz.  
+           60 was the max on my chip due to SPI speed limitations
+      -h = suppress headers on the output file
+      -i = override default spi speed of 8,500,000 hz
+      -l = gpio load spi.  Only needed on really old RPi's.
       -o = output file name
       -r = reference voltage, default=5.0
       -s = samples [1-40000]
@@ -56,7 +58,7 @@ Below are the options with a basic description.
               + volts--trigger when rising
               - volts--trigger when falling
       -v = verbose output    
-      -x = sample display scale (default=1.0)
+      -x = sample display scale used in zeta mode (default=1.0)
       -z = zeta mode (when using ST7789 240x320 display)
 
 ## Examples
