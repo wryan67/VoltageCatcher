@@ -908,7 +908,6 @@ int main(int argc, char **argv)
     piHiPri(99);
 
     char cmd[128];
-    printf("Program initialization\n");
 
 
 	sprintf(cmd, "ps -ef | awk '{if (/usr.local.bin.vc / && !/awk/ && $2!=%d && $2!=%d) system(sprintf(\"kill -9 %%d\",$2))}'", getpid(),getppid());
@@ -917,6 +916,7 @@ int main(int argc, char **argv)
 	if (!options.commandLineOptions(argc, argv)) {
 		exit(1);
 	}
+    printf("Program initialization\n");
 
     verbose     = options.verboseOutput;
     daemonMode  = options.daemon;
