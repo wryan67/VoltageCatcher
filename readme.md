@@ -1,7 +1,7 @@
 Voltage Catcher
 ---------------
 
-Voltage catcher uses a Raspberry Pi and and MCP3008 chip to capture line voltages and save samples to csv files.  The progam can work with or without a ST7789 LED display.  See the wiring diagram in the readme folder for instructions on connecting the MCP3008 and/or the LED display to your Raspberry Pi.   Once the data has been captured, you can then use WinScp or your favorite SFTP/SCP utility to copy the files to your PC or laptop.
+Voltage catcher uses a Raspberry Pi and and MCP3008 chip to capture line voltages and save samples to csv files.  The progam can work with or without a [ST7789 LCD display with 240×320 resolution](https://www.amazon.com/dp/B081Q79X2F).  See the wiring diagram in the readme folder for instructions on connecting the MCP3008 and/or the LED display to your Raspberry Pi.   Once the data has been captured, you can then use WinScp or your favorite SFTP/SCP utility to copy the files to your PC or laptop.
 
 
 ## Requirements
