@@ -116,3 +116,4 @@ When using zeta mode, use the button on BCM GPIO pin 16 to activate the data cap
     data saved...
     actual sps=20000
 
+![ST7789](https://github.com/wryan67/VoltageCatcher/blob/master/readme/st7789%20display.jpg?raw=true "ST7789 @ 240×320")
