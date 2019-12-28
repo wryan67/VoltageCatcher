@@ -200,20 +200,23 @@ bool Options::commandLineOptions(int argc, char **argv) {
 void Options::displayParameters() {
 
 
-    printf("samples:            %d\n", sampleCount);
-    printf("desired sps:        %d\n", desiredSPSk);
-    printf("reference voltage:  %f\n", refVolts);
+    printf("-----------------------------------------------------\n");
+    printf("Samples:            %d\n",    sampleCount);
+    printf("Desired SPS:        %dk\n",    desiredSPSk);
+    printf("Reference voltage:  %.2f\n", refVolts);
     if (!autoTrigger) {
-        printf("trigger voltage:    %f\n", triggerVoltage);
-        printf("trigger vector:     %s\n", (triggerVector > 0) ? "rising" : "falling");
+        printf("Trigger voltage:    %f\n", triggerVoltage);
+        printf("Trigger vector:     %s\n", (triggerVector > 0) ? "rising" : "falling");
     }
     else {
-        printf("trigger voltage:    auto\n");
+        printf("Trigger voltage:    auto\n");
+        printf("Trigger vector:     rising\n");
     }
 
 
+    printf("SPI Channel:        %d\n", spiChannel);
     printf("SPI Speed:          %d\n", spiSpeed);
-    printf("output file:        %s\n", sampleFileName);
-
+    printf("Output file:        %s\n", sampleFileName);
+    printf("-----------------------------------------------------\n");
 }
 

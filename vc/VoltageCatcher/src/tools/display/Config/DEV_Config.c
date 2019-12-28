@@ -154,10 +154,16 @@ void GPIO_Config(void)
 {
     int Equipment = DEV_Equipment_Testing();
     if(Equipment=='R'){
-		DEV_RST_PIN = 2;//  27=bcm   wpi=2
-		DEV_DC_PIN = 6;//   25=bcm   wpi=6
-		DEV_CS_PIN = 26;//   12=bcm  wpi=26
-		DEV_BL_PIN = 29;//   21=bcm  wpi=29;
+		DEV_RST_PIN  = 2;//  27=bcm   wpi=2
+		DEV_DC_PIN  = 6;//   25=bcm   wpi=6
+		DEV_CS_PIN  = 26;//   12=bcm  wpi=26
+		DEV_BL_PIN  = 29;//   21=bcm  wpi=29;
+
+        DEV_CS_PIN  = 21;//   5=bcm   wpi=21
+        DEV_DC_PIN  = 22;//   6=bcm   wpi=22
+        DEV_RST_PIN = 23;//   13=bcm  wpi=23
+        DEV_BL_PIN  = 24;//   19=bcm  wpi=24
+
 		
     }else if(Equipment=='J'){
         #if USE_DEV_LIB

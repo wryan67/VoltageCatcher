@@ -307,14 +307,14 @@ void dumpResults() {
     options.actualSPS = 1000000.0 * options.sampleCount / elapsed;
     options.capturedSPS = options.actualSPS;
 
-	printf("sps=%d\n", options.actualSPS);
+	printf("actual sps=%d\n", options.actualSPS);
 
 
     if (!options.zetaMode) {
         options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
         digitalWrite(10, HIGH);
         digitalWrite(11, HIGH);
-        digitalWrite(26, LOW);
+        digitalWrite(21, LOW);
         displayResults(options, samples, 0);
         exit(0);
     }
@@ -705,7 +705,7 @@ void displayChart(int fps) {
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
     digitalWrite(10, HIGH);
     digitalWrite(11, HIGH);
-    digitalWrite(26, LOW);
+    digitalWrite(21, LOW);
     
     for (int channelIndex = 0; channels[channelIndex] >= 0; ++channelIndex) {
         Sample *s = &zetaData[1][channels[channelIndex]];
@@ -717,7 +717,7 @@ void displayChart(int fps) {
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed);
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
-    digitalWrite(26, HIGH);
+    digitalWrite(21, HIGH);
     usleep(1500);
 
     samplingActive = true;
@@ -734,7 +734,7 @@ void displayCapturingLock() {
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
     digitalWrite(10, HIGH);
     digitalWrite(11, HIGH);
-    digitalWrite(26, LOW);
+    digitalWrite(21, LOW);
 
     displayCapturing();
 
@@ -742,7 +742,7 @@ void displayCapturingLock() {
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed);
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
-    digitalWrite(26, HIGH);
+    digitalWrite(21, HIGH);
     delay(100);
 
     pthread_mutex_unlock(&spiBusLock);
@@ -954,7 +954,7 @@ int main(int argc, char **argv)
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.displaySPISpeed);
     digitalWrite(10, HIGH);
     digitalWrite(11, HIGH);
-    digitalWrite(26, LOW);
+    digitalWrite(21, LOW);
 
     LCD_Init();
     LCD_Clear(BLACK);
@@ -962,7 +962,7 @@ int main(int argc, char **argv)
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed);
     digitalWrite(10, LOW);
     digitalWrite(11, LOW);
-    digitalWrite(26, HIGH);
+    digitalWrite(21, HIGH);
 
     if (options.zetaMode) {
         setupZeta();
