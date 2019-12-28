@@ -7,3 +7,4 @@ Folders:
 
 * vc - This is the command line version
 * wf - This is the Java web interface 
+* readme - Contains a wiring diagram
