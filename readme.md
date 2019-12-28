@@ -85,5 +85,32 @@ If you receive errors about a missing vc command, make sure /usr/local/bin is in
     data saved...
     actual sps=12559
 
-When using zeta mode, the button on BCM GPIO pin 16 to activate the data capture.  The output file will be overwritten each time a data capture is initiated.
+When using zeta mode, use the button on BCM GPIO pin 16 to activate the data capture and save to disk feature.  The output file will be overwritten each time a data capture is initiated.  Currently the only screen supported in zeta mode is the ST7789 LCD display with 240×320.  
+
+    $ sudo /usr/local/bin/vc  -o /home/wryan/test.csv -s 5000 -c 0,1 -f 20 -z -x 2
+    Program initialization
+    -----------------------------------------------------
+    Samples:            5000
+    Desired SPS:        20k
+    Reference voltage:  5.00
+    Trigger voltage:    auto
+    Trigger vector:     rising
+    SPI Channel:        0
+    SPI Speed:          8500000
+    Output file:        /home/wryan/test.csv
+    Display scale:      2.00
+    -----------------------------------------------------
+    setup event triggers
+    trigger voltage=2.146
+    taking samples...
+    data capture begins...    << Button was pressed here
+    trigger voltage=2.128
+    taking samples...
+    elapsed µs=249989
+    saving results...
+    end capture detected
+    trigger voltage=2.113
+    taking samples...
+    data saved...
+    actual sps=20000
 
