@@ -16,6 +16,14 @@ This Library is based on [WiringPi](http://wiringpi.com/), so, you'll need make 
 have WiringPi installed before you can succesfully compile this library.  
 
 
+## Download
+Use git to download the software from github.com:
+
+    $ cd projects   { or wherever you put downloads }
+    $ git clone https://github.com/wryan67/VoltageCatcher.git
+    $ cd VoltageCatcher
+
+
 ## Install
 
 To compile this library, navigate into the src folder and use the make utility to compile 
