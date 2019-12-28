@@ -41,8 +41,8 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
     Paint_SetRotate(270);
 
 
-    int maxX = LCD_HEIGHT;
-    int maxY = LCD_WIDTH;
+    int maxX = LCD_HEIGHT;  // 320
+    int maxY = LCD_WIDTH;   // 240
     int midY = LCD_WIDTH / 2;
     //                    320           240
 //    Paint_DrawCircle(LCD_HEIGHT / 2, LCD_WIDTH / 2, 25, GREEN, DRAW_FILL_EMPTY, DOT_PIXEL_2X2);
