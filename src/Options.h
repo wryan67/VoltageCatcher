@@ -46,7 +46,8 @@ public:
 	int  spiChannel = 0;
     bool spiOverride = false;
     int  spiSpeed = -1;
-    int  displaySPISpeed = 90000000;
+//    int  displaySPISpeed = 90000000;  // max speed on short cable
+    int  displaySPISpeed = 60000000;  // can go faster if display cable is really short
 
 	int   debugLevel = 0;
 	char *sampleFileName;
