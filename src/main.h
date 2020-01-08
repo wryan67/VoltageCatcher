@@ -37,7 +37,7 @@ using namespace std::chrono;
 #define ClockOutPin    1
 #define ClockInPin     4
 #define ClockInPinBCM  23
-#define DataCapturePin 27
+#define DataCapturePin 27  // bcm 16
 
 
 // sps is in kHz

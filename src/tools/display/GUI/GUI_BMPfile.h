@@ -79,6 +79,7 @@ typedef struct BMP_INFO {
     UDOUBLE biYPelsPerMeter; //Vertical resolution
     UDOUBLE biClrUsed;       //The number of colors used
     UDOUBLE biClrImportant;  //The number of important colors
+
 } __attribute__ ((packed)) BMPINFOHEADER;
 
 /*Color table: palette */

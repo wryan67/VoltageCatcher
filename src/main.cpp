@@ -42,7 +42,7 @@ struct zetaStruct {
     float channelVolts[8];
 };
 
-long long lastSave;
+long long lastSave=0;
 
 
 
@@ -315,7 +315,7 @@ void dumpResults() {
         digitalWrite(10, HIGH);
         digitalWrite(11, HIGH);
         digitalWrite(21, LOW);
-        displayResults(options, samples, 0);
+        displayResults(options, samples, 0, true);
         exit(0);
     }
 }
@@ -453,14 +453,20 @@ void breakOut(int out) {
 void displayCapturingLock();
 void dataCapture();
 void dataCaputreActivation(void) {
-
+    printf("TAG00\n"); fflush(stdout);
     piLock(3);
     long long now = currentTimeMillis();
-    long elapsed = now - lastSave;
+    long long elapsed = now - lastSave;
+
+    printf("TAG01 dataCaptureActive=%d now=%lld, elapsed=%lld\n", dataCaptureActive, now, elapsed); fflush(stdout);
+
+
     if (elapsed < 1000 || dataCaptureActive) {
+        printf("TAG02\n"); fflush(stdout);
         piUnlock(3);
         return;
     }
+    printf("TAG03\n"); fflush(stdout);
     daemonMode = false;
     samplingActive = false;
     dataCaptureActive = true;
@@ -711,7 +717,7 @@ void displayChart(int fps) {
         Sample *s = &zetaData[1][channels[channelIndex]];
     }
 
-    displayResults(options, zetaData, fps);
+    displayResults(options, zetaData, fps, false);
 
     close(options.spiHandle);
     options.spiHandle = wiringPiSPISetup(options.spiChannel, options.spiSpeed);
@@ -946,7 +952,7 @@ int main(int argc, char **argv)
 //    threadCreate(sampleClockRateTPS, "sampleRateTPS");
 
     GPIO_Config();
-
+       
     pinMode(10, OUTPUT);
     pinMode(11, OUTPUT);
     pinMode(26, OUTPUT);
@@ -966,7 +972,8 @@ int main(int argc, char **argv)
 
     if (options.zetaMode) {
         setupZeta();
-
+        pinMode(DataCapturePin, INPUT);
+        pullUpDnControl(DataCapturePin, PUD_UP);
         if (wiringPiISR(DataCapturePin, INT_EDGE_RISING, &dataCaputreActivation) < 0) {
             fprintf(stderr, "Unable to setup ISR: %s\n", strerror(errno));
             return 1;

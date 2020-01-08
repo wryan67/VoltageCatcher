@@ -23,7 +23,101 @@ void arcPoint(int x, int y, int radius, double degree, int* xPoint, int* yPoint)
 
 int imageSize = LCD_WIDTH * LCD_HEIGHT * 2;
 
-void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps) {
+
+void writeBmp(FILE* fp, UBYTE* localImage, int width, int height) {
+
+    BMPFILEHEADER bmpFileHeader;  //Define a bmp file header structure
+    BMPINFOHEADER bmpInfoHeader;  //Define a bmp info header structure
+
+    bmpFileHeader.bType = 'M' << 8 | 'B';
+    bmpFileHeader.bSize = sizeof(bmpFileHeader) + sizeof(bmpInfoHeader) + 2 * width * height;
+    bmpFileHeader.bReserved1 = 0;
+    bmpFileHeader.bReserved2 = 0;
+    bmpFileHeader.bOffset = sizeof(bmpFileHeader) + sizeof(bmpInfoHeader);
+
+    bmpInfoHeader.biInfoSize = sizeof(BMPINFOHEADER);
+    bmpInfoHeader.biWidth = height;
+    bmpInfoHeader.biHeight= width;
+    bmpInfoHeader.biPlanes = 1;
+    bmpInfoHeader.biBitCount = 24;
+    bmpInfoHeader.biCompression = 0;
+    bmpInfoHeader.bimpImageSize = 0;
+    bmpInfoHeader.biXPelsPerMeter = 0;
+    bmpInfoHeader.biYPelsPerMeter = 0;
+    bmpInfoHeader.biClrUsed = 0;
+    bmpInfoHeader.biClrImportant = 16;
+
+
+    fwrite(&bmpFileHeader, sizeof(BMPFILEHEADER), 1, fp);    //sizeof(BMPFILEHEADER) must be 14
+    fwrite(&bmpInfoHeader, sizeof(BMPINFOHEADER), 1, fp);    //sizeof(BMPFILEHEADER) must be 50
+
+    for (int Ypoint = 0; Ypoint < width; ++Ypoint) {
+        for (int Xpoint = 0; Xpoint < height; ++Xpoint) {
+            int X, Y;
+            switch (ROTATE_270) {
+            case 0:
+                X = Xpoint;
+                Y = Ypoint;
+                break;
+            case 90:
+                X = Paint.WidthMemory - Ypoint - 1;
+                Y = Xpoint;
+                break;
+            case 180:
+                X = Paint.WidthMemory - Xpoint - 1;
+                Y = Paint.HeightMemory - Ypoint - 1;
+                break;
+            case 270:
+                X = Ypoint;
+                Y = Paint.HeightMemory - Xpoint - 1;
+                break;
+
+            default:
+                return;
+            }
+
+            switch (MIRROR_HORIZONTAL) {
+            case MIRROR_NONE:
+                break;
+            case MIRROR_HORIZONTAL:
+                X = Paint.WidthMemory - X - 1;
+                break;
+            case MIRROR_VERTICAL:
+                Y = Paint.HeightMemory - Y - 1;
+                break;
+            case MIRROR_ORIGIN:
+                X = Paint.WidthMemory - X - 1;
+                Y = Paint.HeightMemory - Y - 1;
+                break;
+            default:
+                return;
+            }
+
+            UDOUBLE Addr = X * 2 + Y * Paint.WidthByte;
+            uint16_t color = (Paint.Image[Addr] << 8) | Paint.Image[Addr + 1];
+            
+            uint8_t blue  = (color & 0xF800) >> 11;
+            uint8_t green = (color & 0x07E0) >> 5;
+            uint8_t red   = (color & 0x001f);
+
+            red   = (red   / (double)32.0) * 256;
+            green = (green / (double)64.0) * 256;
+            blue  = (blue  / (double)32.0) * 256;
+
+
+
+            fwrite(&red, 1, 1, fp);   
+            fwrite(&green, 1, 1, fp);
+            fwrite(&blue, 1, 1, fp);
+
+        }
+    }
+
+    fclose(fp);
+}
+
+
+void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps, bool writeBMP) {
 
     signal(SIGINT, Handler);
     UBYTE* localImage = NULL;
@@ -116,8 +210,27 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
 
     //memcpy(chartImage, localImage, imageSize);
 
+
     LCD_Display(localImage);
 
+    if (writeBMP) {
+        char imageFileName[512];
+        char tmpstr[512];
+        strcpy(imageFileName, options.sampleFileName);
+        strcpy(tmpstr, options.sampleFileName);
+        int l1 = strlen(tmpstr);
+        strtolower(tmpstr);
+        if (strcmp(&tmpstr[l1 - 5], ".csv")) {
+            imageFileName[l1 - 4] = 0;
+        }
+        strcat(imageFileName, ".bmp");
+
+
+        FILE* bmpFile = fopen(imageFileName, "w");
+        if (bmpFile) {
+            writeBmp(bmpFile, localImage, LCD_WIDTH, LCD_HEIGHT);
+        }
+    }
     free(localImage);
 
 //printf("lcd close\n"); fflush(stdout);
