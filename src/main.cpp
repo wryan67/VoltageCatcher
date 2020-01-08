@@ -974,7 +974,7 @@ int main(int argc, char **argv)
         setupZeta();
         pinMode(DataCapturePin, INPUT);
         pullUpDnControl(DataCapturePin, PUD_UP);
-        if (wiringPiISR(DataCapturePin, INT_EDGE_RISING, &dataCaputreActivation) < 0) {
+        if (wiringPiISR(DataCapturePin, INT_EDGE_FALLING, &dataCaputreActivation) < 0) {
             fprintf(stderr, "Unable to setup ISR: %s\n", strerror(errno));
             return 1;
         }
