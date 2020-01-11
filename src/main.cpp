@@ -844,7 +844,7 @@ void setupZeta() {
         exit(2);
     }
 
-    pthread_t zetaReadId = threadCreate(zetaRead, "zetaRead");
+    pthread_t zetaReadId = threadCreate(zetaRead, (char *)"zetaRead");
 
 
 }
@@ -987,7 +987,7 @@ int main(int argc, char **argv)
 
 
 
-    threadCreate(takeSamplePolling, "takeSamplePoling");
+    threadCreate(takeSamplePolling, (char *)"takeSamplePoling");
 
     if (!options.zetaMode) {
 
