@@ -913,7 +913,8 @@ int main(int argc, char **argv)
 		fprintf(stderr, "please use sudo to execute this command\n");
 		exit(2);
 	}
-    piHiPri(99);
+//    piHiPri(99);
+    setpriority(PRIO_PROCESS, getpid(), -20);
 
     char cmd[128];
 

@@ -13,7 +13,7 @@
 #include <iostream>
 #include <chrono>
 #include <poll.h>
-
+#include <sys/resource.h>
 
 // engenerring
 #include <wiringPi.h>
