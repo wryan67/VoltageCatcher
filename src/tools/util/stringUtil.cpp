@@ -18,7 +18,7 @@ char *strtolower(char *s) {
 	return s;
 }
 
-char **split(const char *s, const char *t) {
+char **split(char *s, char *t) {
 	if (t == NULL || s == NULL) {
 		return NULL;
 	}

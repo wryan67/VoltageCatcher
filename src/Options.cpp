@@ -74,7 +74,7 @@ bool Options::commandLineOptions(int argc, char **argv) {
 		switch (c) {
 		case 'c': {
 			memset(&channels, -1, sizeof(channels));
-			char **parts = split(optarg, ",");
+			char **parts = split(optarg, (char *)",");
 
 			for (int i = 0; parts[i] != NULL; ++i) {
 				if (i >= MCP3008_CHANNELS) {
