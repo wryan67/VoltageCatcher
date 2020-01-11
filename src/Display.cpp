@@ -1,5 +1,10 @@
 #include "Display.h"
 
+#ifndef NULL
+#define NULL 0
+#endif // !NULL
+
+
 double PI = 3.14159;
 
 void  Handler(int signo) {
@@ -117,12 +122,11 @@ void writeBmp(FILE* fp, UBYTE* localImage, int width, int height) {
 }
 
 
-void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps, bool writeBMP) {
+void drawChart(UBYTE* localImage, Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps, bool showCaptured) {
+
+
 
     signal(SIGINT, Handler);
-    UBYTE* localImage = NULL;
-
-    localImage = (UBYTE*)malloc(imageSize);
 
 
     if (localImage == NULL) {
@@ -145,13 +149,13 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
     Paint_DrawLine(1, maxY, maxX, maxY, WHITE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
 
     for (int v = 1; v < options.refVolts; ++v) {
-        int y= maxY - ((v / options.refVolts) * maxY);
+        int y = maxY - ((v / options.refVolts) * maxY);
         Paint_DrawLine(1, y, maxX, y, BROWN, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
     }   Paint_DrawLine(1, 1, maxX, 1, DARKBLUE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
 
 
     // y-axis
-    Paint_DrawLine(1, maxY, 1,    1,    WHITE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
+    Paint_DrawLine(1, maxY, 1, 1, WHITE, LINE_STYLE_SOLID, DOT_PIXEL_1X1);
 
 
     int lineColor[MCP3008_CHANNELS + 1] = {
@@ -201,41 +205,64 @@ void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHA
 
     long long now = currentTimeMillis();
     long long elapsed = now - options.captureMessage;
-    if (elapsed < 6000) {
+    if (elapsed < 6000 && showCaptured) {
         sprintf(message, "Data Saved");
-        Paint_DrawString_EN(maxX/2 - (17 * strlen(message)/2), maxY/2 - 24, message, &Font24, BLACK, WHITE);
-        sprintf(message, "SPS: %d",options.capturedSPS);
-        Paint_DrawString_EN(maxX / 2 - (17 * strlen(message) / 2), maxY / 2 , message, &Font24, BLACK, WHITE);
+        Paint_DrawString_EN(maxX / 2 - (17 * strlen(message) / 2), maxY / 2 - 24, message, &Font24, BLACK, WHITE);
+        sprintf(message, "SPS: %d", options.capturedSPS);
+        Paint_DrawString_EN(maxX / 2 - (17 * strlen(message) / 2), maxY / 2, message, &Font24, BLACK, WHITE);
     }
 
     //memcpy(chartImage, localImage, imageSize);
+}
+
+void saveImage(UBYTE* localImage, Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps) {
+    bool freeImage = false;
+
+    if (localImage == NULL) {
+        freeImage = true;
+        localImage = (UBYTE*)malloc(imageSize);
+         
+        drawChart(localImage, options, samples, fps, false);
+    }
+
+
+    char imageFileName[512];
+    char tmpstr[512];
+    strcpy(imageFileName, options.sampleFileName);
+    strcpy(tmpstr, options.sampleFileName);
+    int l1 = strlen(tmpstr);
+    strtolower(tmpstr);
+    if (strcmp(&tmpstr[l1 - 5], ".csv")) {
+        imageFileName[l1 - 4] = 0;
+    }
+    strcat(imageFileName, ".bmp");
+
+
+    FILE* bmpFile = fopen(imageFileName, "w");
+    writeBmp(bmpFile, localImage, LCD_WIDTH, LCD_HEIGHT);
+
+
+    if (freeImage) {
+        free(localImage);
+    }
+}
+
+void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps, bool writeBMP) {
+
+    UBYTE* localImage = NULL;
+
+    localImage = (UBYTE*)malloc(imageSize);
+
+    drawChart(localImage, options, samples, fps, true);
 
 
     LCD_Display(localImage);
 
     if (writeBMP) {
-        char imageFileName[512];
-        char tmpstr[512];
-        strcpy(imageFileName, options.sampleFileName);
-        strcpy(tmpstr, options.sampleFileName);
-        int l1 = strlen(tmpstr);
-        strtolower(tmpstr);
-        if (strcmp(&tmpstr[l1 - 5], ".csv")) {
-            imageFileName[l1 - 4] = 0;
-        }
-        strcat(imageFileName, ".bmp");
-
-
-        FILE* bmpFile = fopen(imageFileName, "w");
-        if (bmpFile) {
-            writeBmp(bmpFile, localImage, LCD_WIDTH, LCD_HEIGHT);
-        }
+        saveImage(localImage, options, samples, fps);
     }
     free(localImage);
 
-//printf("lcd close\n"); fflush(stdout);
-
-//DEV_ModuleExit();
     return;
 }
 

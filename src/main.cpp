@@ -6,6 +6,11 @@
 
 #include "main.h"
 
+#ifndef NULL
+#define NULL 0
+#endif // !NULL
+
+
 Options options = Options();
 Sample  samples[10* maxSamples + 1][MCP3008_CHANNELS] = { Sample() };
 Sample  zetaData[10* maxSamples + 1][MCP3008_CHANNELS];
@@ -317,6 +322,8 @@ void dumpResults() {
         digitalWrite(21, LOW);
         displayResults(options, samples, 0, true);
         exit(0);
+    }  else {
+        saveImage(NULL, options, samples, 0);
     }
 }
 
@@ -453,20 +460,15 @@ void breakOut(int out) {
 void displayCapturingLock();
 void dataCapture();
 void dataCaputreActivation(void) {
-    printf("TAG00\n"); fflush(stdout);
     piLock(3);
     long long now = currentTimeMillis();
     long long elapsed = now - lastSave;
 
-    printf("TAG01 dataCaptureActive=%d now=%lld, elapsed=%lld\n", dataCaptureActive, now, elapsed); fflush(stdout);
-
-
     if (elapsed < 1000 || dataCaptureActive) {
-        printf("TAG02\n"); fflush(stdout);
         piUnlock(3);
         return;
     }
-    printf("TAG03\n"); fflush(stdout);
+
     daemonMode = false;
     samplingActive = false;
     dataCaptureActive = true;

@@ -17,3 +17,5 @@
 void displayResults(Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps, bool writeBMP);
 
 void displayCapturing();
+
+void saveImage(UBYTE* localImage, Options options, Sample  samples[maxSamples + 1][MCP3008_CHANNELS], int fps);
