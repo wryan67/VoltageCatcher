@@ -11,3 +11,5 @@ The wiki page has instructions for downloading, installing, and using Voltage Ca
 
 
 ![ST7789](https://github.com/wryan67/VoltageCatcher/blob/master/readme/st7789%20display.thumbnail.jpg?raw=true "ST7789 @ 240×320")
+
+<a href="https://github.com/wryan67/VoltageCatcher/wiki rel="wiki">![Wiki](https://github.com/wryan67/VoltageCatcher/blob/master/readme/st7789%20display.thumbnail.jpg?raw=true "ST7789 @ 240×320")</a>
