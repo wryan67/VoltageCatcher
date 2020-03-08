@@ -10,11 +10,4 @@ The wiki page has instructions for downloading, installing, and using Voltage Ca
    [Voltage Catcher Wiki Pages](https://github.com/wryan67/VoltageCatcher/wiki)
 
 
-![ST7789](https://github.com/wryan67/VoltageCatcher/blob/master/readme/st7789%20display.thumbnail.jpg?raw=true "ST7789 @ 240×320")
-
-<a href="https://github.com/wryan67/VoltageCatcher/wiki>![Wiki](https://github.com/wryan67/VoltageCatcher/blob/master/readme/st7789%20display.thumbnail.jpg?raw=true "ST7789 @ 240×320")</a>
-
-
 [<img src="https://github.com/wryan67/VoltageCatcher/blob/master/readme/st7789%20display.thumbnail.jpg?raw=true">](https://github.com/wryan67/VoltageCatcher/wiki)
-
-[![Wiki](https://github.com/wryan67/VoltageCatcher/blob/master/readme/st7789%20display.thumbnail.jpg?raw=true)](https://github.com/wryan67/VoltageCatcher/wiki)
